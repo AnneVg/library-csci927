@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id            String          @id @default(cuid())
+  name          String
+  studentId     String          @map("student_id")
+  status        String          @map("status")
+  borrowingBook BorrowingBook[]
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime        @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("member")
+}
+
+model Book {
+  id               String          @id @default(cuid())
+  title            String
+  author           String
+  isbn             String
+  shortDescription String          @map("short_description")
+  category         String
+  location         String
+  status           String
+  borrowingBook    BorrowingBook[]
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime        @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("book")
+}
+
+model BorrowingBook {
+  id               String   @id @default(cuid())
+  bookId           String   @map("book_id")
+  book             Book     @relation(fields: [bookId], references: [id])
+  memberId         String   @map("member_id")
+  member           Member   @relation(fields: [memberId], references: [id])
+  isbn             String
+  shortDescription String   @map("short_description")
+  category         String
+  location         String
+  status           String
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("borrowing_book")
+}

@@ -1,0 +1,29 @@
+{
+    "name": "library-db",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "type": "commonjs",
+    "version": "0.0.1",
+    "author": "camanhlearning@gmail.com",
+    "private": true,
+    "license": "UNLICENSED",
+    "devDependencies": {
+      "@types/node": "18.16.12",
+      "jest": "29.5.0",
+      "prettier": "^2.8.8",
+      "prisma": "latest",
+      "rimraf": "^5.0.1",
+      "ts-node": "^10.9.1",
+      "typescript": "^5.2.2"
+    },
+    "dependencies": {
+      "@prisma/client": "latest",
+      "dotenv": "^16.3.1"
+    },
+    "scripts": {
+      "build": "rimraf dist && tsc --build",
+      "db:generate": "prisma generate",
+      "db:push": "prisma db push --skip-generate",
+      "db:deploy": "prisma migrate deploy"
+    }
+  }

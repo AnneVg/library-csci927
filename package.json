@@ -1,0 +1,17 @@
+{
+  "name": "library-csci927",
+  "version": "1.0.0",
+  "description": "",
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "turbo": "1.10.3"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build --include-dependencies",
+    "build:api": "turbo run build --filter=@bcpros/lixi-gitbot-api",
+    "db:deploy": "turbo run db:deploy --filter=@bcrpos/lixi-gitbot-db",
+    "format": "turbo run format",
+    "prepare": "husky install"
+  }
+}
