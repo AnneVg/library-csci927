@@ -1,7 +1,7 @@
 {
-    "name": "library-db",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "name": "database",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
     "type": "commonjs",
     "version": "0.0.1",
     "author": "camanhlearning@gmail.com",
