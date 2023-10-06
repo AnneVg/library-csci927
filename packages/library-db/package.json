@@ -24,6 +24,7 @@
       "build": "rimraf dist && tsc --build",
       "db:generate": "prisma generate",
       "db:push": "prisma db push --skip-generate",
-      "db:deploy": "prisma migrate deploy"
+      "db:deploy": "prisma migrate deploy",
+      "db:seeds": "ts-node prisma/seeds/index.ts"
     }
   }

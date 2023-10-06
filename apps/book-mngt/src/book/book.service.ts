@@ -11,8 +11,18 @@ export class BookService {
   ) {
   }
 
-  async getBook(id: string) {
-    this.prisma.book
+  async getAllBooks() {
+    const books = await this.prisma.book.findMany({});
+    return books;
+  }
+
+  async getBookById(id: string) {
+    const book = this.prisma.book.findUnique({
+      where: {
+        id: id
+      }
+    });
+    return book;
   }
 
   async addBook() {
