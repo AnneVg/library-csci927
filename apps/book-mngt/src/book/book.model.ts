@@ -6,6 +6,7 @@ export class Book {
     category: string;
     location: string;
     status: string;
+    author: string;
     createdAt?: Date;
     updatedAt?: Date;
     constructor(partial: Partial<Book>) {
