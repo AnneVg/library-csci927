@@ -1,64 +1,65 @@
-import React from "react";
-import { Authenticated, GitHubBanner, Refine } from "@refinedev/core";
-import { RefineKbarProvider } from "@refinedev/kbar";
 import {
-    notificationProvider,
-    ThemedLayoutV2,
+    DashboardOutlined,
+    ShopOutlined,
+    ShoppingOutlined,
+    StarOutlined,
+    UserOutlined,
+    UsergroupAddOutlined
+} from "@ant-design/icons";
+import {
     ErrorComponent,
+    ThemedLayoutV2,
+    notificationProvider,
 } from "@refinedev/antd";
+import { Authenticated, Refine } from "@refinedev/core";
+import { RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
     CatchAllNavigate,
+    DocumentTitleHandler,
     NavigateToResource,
     UnsavedChangesNotifier,
-    DocumentTitleHandler,
 } from "@refinedev/react-router-v6";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import {
-    ShoppingOutlined,
-    UsergroupAddOutlined,
-    ShopOutlined,
-    StarOutlined,
-    DashboardOutlined,
-    UserOutlined
-} from "@ant-design/icons";
 import jsonServerDataProvider from "@refinedev/simple-rest";
+import React from "react";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { authProvider } from "./authProvider";
 
 import "dayjs/locale/de";
 
-import { DashboardPage } from "./pages/dashboard";
-import { OrderList, OrderShow } from "./pages/orders";
+import { useTranslation } from "react-i18next";
+import { Header, OffLayoutArea, Title } from "./components";
+import { BikeWhiteIcon, PizzaIcon } from "./components/icons";
+import { ConfigProvider } from "./context";
 import { AuthPage } from "./pages/auth";
-import { UserList, UserShow } from "./pages/users";
+import { CategoryList } from "./pages/categories";
 import {
-    CourierList,
-    CourierShow,
     CourierCreate,
     CourierEdit,
+    CourierList,
+    CourierShow,
 } from "./pages/couriers";
+import { DashboardPage } from "./pages/dashboard";
 import {
-    MemberList,
-    MemberShow,
     MemberCreate,
     MemberEdit,
+    MemberList,
+    MemberShow,
 } from "./pages/members";
+import { OrderList, OrderShow } from "./pages/orders";
 import { ProductList } from "./pages/products";
-import { StoreCreate, StoreEdit, StoreList } from "./pages/stores";
-import { CategoryList } from "./pages/categories";
 import { ReviewsList } from "./pages/reviews";
-import { useTranslation } from "react-i18next";
-import { Header, Title, OffLayoutArea } from "./components";
-import { BikeWhiteIcon, PizzaIcon, UserIcon } from "./components/icons";
-import { ConfigProvider } from "./context";
+import { StoreCreate, StoreEdit, StoreList } from "./pages/stores";
+import { UserList, UserShow } from "./pages/users";
 
 import "@refinedev/antd/dist/reset.css";
 
 const App: React.FC = () => {
     const API_URL = "https://api.finefoods.refine.dev";
 
-    const BOOK_API_URL = "http://localhost:4200";
+    const BOOK_API_URL = "http://localhost:4201/api";
 
     const dataProvider = jsonServerDataProvider(API_URL);
+    const bookProvider = jsonServerDataProvider(BOOK_API_URL);
 
     const { t, i18n } = useTranslation();
 
@@ -74,7 +75,10 @@ const App: React.FC = () => {
                 <RefineKbarProvider>
                     <Refine
                         routerProvider={routerProvider}
-                        dataProvider={dataProvider}
+                        dataProvider={{
+                            default: dataProvider,
+                            books: bookProvider
+                        }}
                         authProvider={authProvider}
                         i18nProvider={i18nProvider}
                         options={{
@@ -135,6 +139,7 @@ const App: React.FC = () => {
                                 show: "/members/show/:id",
                                 meta: {
                                     icon: <UserOutlined />,
+                                    dataProviderName: "books"
                                 },
                             },
                             {

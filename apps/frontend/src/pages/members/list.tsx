@@ -13,6 +13,33 @@ import {
 import { Table, Avatar, Dropdown, Menu, Space, Typography } from "antd";
 
 import { ICourier } from "../../interfaces";
+import { MemberStatus } from "../../components";
+import styled from "@emotion/styled";
+
+const StyledAvatar = styled(Avatar)`
+  width: 46px;
+  height: 46px;
+  font-size: 18px;
+  display: flex !important;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  .ant-avatar-string {
+    position: absolute;
+    left: 50%;
+    transform-origin: 0 center;
+  }
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  .avatar-anonymous {
+    width: 46px !important;
+    height: 46px !important;
+  }
+`;
 
 export const MemberList: React.FC<IResourceComponentsProps> = () => {
     const { show, edit } = useNavigation();
@@ -27,6 +54,18 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
         ],
     });
 
+    const transformShortName = (name: string) => {
+        let shortName = '';
+        let nameArr = name.split(' ');
+        if (nameArr.length > 1) {
+          nameArr = [nameArr[0], nameArr[nameArr.length - 1]];
+        }
+        shortName = nameArr.reduce((rs, name) => {
+          return (rs += name.charAt(0).toUpperCase());
+        }, '');
+        return shortName;
+      };
+
     const { mutate: mutateDelete } = useDelete();
 
     const moreMenu = (id: number) => (
@@ -35,7 +74,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
             onClick={({ domEvent }) => domEvent.stopPropagation()}
         >
             <Menu.Item
-                key="accept"
+                key="edit"
                 style={{
                     fontSize: 15,
                     display: "flex",
@@ -52,13 +91,13 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                     />
                 }
                 onClick={() => {
-                    edit("couriers", id);
+                    edit("members", id);
                 }}
             >
                 {t("buttons.edit")}
             </Menu.Item>
             <Menu.Item
-                key="reject"
+                key="delete"
                 style={{
                     fontSize: 15,
                     display: "flex",
@@ -75,7 +114,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                 }
                 onClick={() => {
                     mutateDelete({
-                        resource: "couriers",
+                        resource: "members",
                         id,
                         mutationMode: "undoable",
                     });
@@ -94,17 +133,19 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                 onRow={(record) => {
                     return {
                         onClick: () => {
-                            show("couriers", record.id);
+                            show("members", record.id);
                         },
                     };
                 }}
             >
                 <Table.Column
                     key="name"
-                    title={t("couriers.fields.name")}
+                    title={t("members.fields.name")}
                     render={(record) => (
                         <Space>
-                            <Avatar size={74} src={record.avatar?.[0]?.url} />
+                            <StyledAvatar size={74} src={record.avatar?.[0]?.url} >
+                                {transformShortName(record.name)}
+                            </StyledAvatar>
                             <Typography.Text style={{ wordBreak: "inherit" }}>
                                 {record.name} {record.surname}
                             </Typography.Text>
@@ -112,16 +153,19 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                     )}
                 />
                 <Table.Column
-                    dataIndex="gsm"
-                    title={t("couriers.fields.gsm")}
+                    dataIndex="studentId"
+                    title={t("members.fields.studentId")}
                 />
                 <Table.Column
                     dataIndex="email"
-                    title={t("couriers.fields.email")}
+                    title={t("members.fields.email")}
                 />
                 <Table.Column
-                    dataIndex="address"
-                    title={t("couriers.fields.address")}
+                    dataIndex="status"
+                    title={t("members.fields.status")}
+                    render={(value) => {
+                        return <MemberStatus status={value} />;
+                    }}
                 />
                 <Table.Column<ICourier>
                     fixed="right"

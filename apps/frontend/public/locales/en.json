@@ -217,6 +217,11 @@
             "On The Way": "On the way",
             "Delivered": "Delivered",
             "Cancelled": "Cancelled"
+        },
+        "memberStatuses": {
+            "active": "Active",
+            "blocked": "Blocked",
+            "expired": "Expired"
         }
     },
     "orders": {
@@ -397,7 +402,7 @@
         "members": "Members",
         "titles": {
             "create": "Create Member",
-            "list": "Memberes",
+            "list": "Members",
             "edit": "Edit Member"
         },
         "fields": {
@@ -407,25 +412,16 @@
                 "description": "Click or drag avatar image to this area to upload."
             },
             "name": "Name",
-            "surname": "Surname",
-            "gender": {
-                "label": "Gender",
-                "male": "Male",
-                "female": "Female"
-            },
-            "gsm": "Phone",
+            "studentId": "Student Id",
+            "status": "Status",
             "email": "E-Mail",
-            "address": "Address",
             "createdAt": "CreatedAt",
             "isActive": "Is Active",
             "images": {
                 "label": "Images",
                 "description": "Add user picture",
                 "validation": "must be 480x480 px"
-            },
-            "store": "Store",
-            "vehicle": "Vehicle",
-            "accountNumber": "Account Number"
+            }
         },
         "steps": {
             "content": "Content",
