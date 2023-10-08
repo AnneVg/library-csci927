@@ -116,7 +116,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                     mutateDelete({
                         resource: "members",
                         id,
-                        mutationMode: "undoable",
+                        mutationMode: "optimistic",
                     });
                 }}
             >
@@ -155,10 +155,6 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                 <Table.Column
                     dataIndex="studentId"
                     title={t("members.fields.studentId")}
-                />
-                <Table.Column
-                    dataIndex="email"
-                    title={t("members.fields.email")}
                 />
                 <Table.Column
                     dataIndex="status"

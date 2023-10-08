@@ -56,10 +56,10 @@ import "@refinedev/antd/dist/reset.css";
 const App: React.FC = () => {
     const API_URL = "https://api.finefoods.refine.dev";
 
-    const BOOK_API_URL = "http://localhost:4201/api";
-
+    const libraryApiUrl = process.env.LIBRARY_API_URL || 'http://localhost:4200/api';
+    
     const dataProvider = jsonServerDataProvider(API_URL);
-    const bookProvider = jsonServerDataProvider(BOOK_API_URL);
+    const bookProvider = jsonServerDataProvider(libraryApiUrl);
 
     const { t, i18n } = useTranslation();
 
@@ -136,7 +136,6 @@ const App: React.FC = () => {
                                 list: "/members",
                                 create: "/members/create",
                                 edit: "/members/edit/:id",
-                                show: "/members/show/:id",
                                 meta: {
                                     icon: <UserOutlined />,
                                     dataProviderName: "books"

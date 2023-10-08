@@ -51,10 +51,11 @@ export class MemberService {
   }
 
   async deleteMember(id: string) {
-    await this.prisma.member.delete({
+    const count = await this.prisma.member.deleteMany({
       where: {
         id: id
       }
     });
+    return count;
   }
 }

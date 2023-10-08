@@ -1,31 +1,31 @@
-import { Controller, Get, Param, Post, Body, Logger, Delete, HttpCode, Patch } from '@nestjs/common';
-import { MemberService } from './member.service';
-import { ApiParam, ApiBody } from '@nestjs/swagger';
+import { Controller, Logger } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { CreateMemberInput } from './create-member.input.model';
+import { MemberService } from './member.service';
 import { UpdateMemberInput } from './update-member.input.model';
 
-@Controller("members")
+@Controller()
 export class MemberController {
   private logger: Logger = new Logger(this.constructor.name);
   constructor(
     private readonly memberService: MemberService,
   ) { }
 
-  @Get(':id')
+  @MessagePattern({cmd: 'get_member'})
   async getMember(
-    @Param('id') id: string,
+    id: string,
   ) {
     return await this.memberService.getMemberById(id);
   }
 
-  @Get()
+  @MessagePattern({cmd: 'get_members'})
   async getMembers() {
     return await this.memberService.getAllMembers();
   }
 
-  @Post()
+  @MessagePattern({cmd: 'create_member'})
   async createMember(
-    @Body() memberInput: CreateMemberInput
+    memberInput: CreateMemberInput
   ) {
     try {
       const member = await this.memberService.addMember(memberInput);
@@ -35,13 +35,12 @@ export class MemberController {
     }
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the member' })
+  @MessagePattern({cmd: 'update_member'})
   async updateMember(
-    @Param('id') id: string,
-    @Body() memberInput: UpdateMemberInput
+    memberInput: UpdateMemberInput
   ) {
     try {
+      const { id } = memberInput;
       if (!id) throw Error('Invalid arguments');
       const member = await this.memberService.updateMember(id, memberInput);
       return member;
@@ -50,13 +49,12 @@ export class MemberController {
     }
   }
 
-  @Delete(':id')
-  @HttpCode(204)
+  @MessagePattern({cmd: 'delete_member'})
   async deleteMember(
-    @Param('id') id: string
+    id: string
   ) {
     try {
-      await this.memberService.deleteMember(id);
+      return await this.memberService.deleteMember(id);
     } catch (err) {
       this.logger.error(err);
     }

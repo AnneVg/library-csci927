@@ -4,7 +4,7 @@
   "description": "",
   "devDependencies": {
     "husky": "^8.0.3",
-    "turbo": "1.10.3"
+    "turbo": "1.10.15"
   },
   "scripts": {
     "dev": "turbo run dev",
