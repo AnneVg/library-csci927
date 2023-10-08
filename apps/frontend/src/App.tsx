@@ -43,7 +43,6 @@ import {
     MemberCreate,
     MemberEdit,
     MemberList,
-    MemberShow,
 } from "./pages/members";
 import { OrderList, OrderShow } from "./pages/orders";
 import { ProductList } from "./pages/products";
@@ -228,10 +227,7 @@ const App: React.FC = () => {
                                         path="edit/:id"
                                         element={<MemberEdit />}
                                     />
-                                    <Route
-                                        path="show/:id"
-                                        element={<MemberShow />}
-                                    />
+                                 
                                 </Route>
 
                                 <Route path="/couriers">
