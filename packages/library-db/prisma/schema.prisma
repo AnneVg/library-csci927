@@ -35,6 +35,15 @@ model Book {
   @@map("book")
 }
 
+model Category {
+  id            String          @id @default(cuid())
+  name          String
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime        @default(now()) @map("updated_at") @db.Timestamptz
+
+  @@map("category")
+}
+
 model BorrowingBook {
   id               String   @id @default(cuid())
   bookId           String   @map("book_id")
