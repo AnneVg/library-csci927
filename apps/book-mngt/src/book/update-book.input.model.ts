@@ -1,3 +1,3 @@
-import { Book } from "./book.model";
+import { Book } from './book.model';
 
-export type UpdateBookInput = Partial<Book>
+export type UpdateBookInput = Partial<Book>;

@@ -25,9 +25,11 @@ model Book {
   author           String
   isbn             String
   shortDescription String          @map("short_description")
-  category         String
+  categoryId       String?         @map("category_id")
+  category         Category?       @relation(fields: [categoryId], references: [id])
   location         String
   status           String
+  stock            Int             @default(0)
   borrowingBook    BorrowingBook[]
   createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime        @default(now()) @map("updated_at") @db.Timestamptz
@@ -36,10 +38,11 @@ model Book {
 }
 
 model Category {
-  id            String          @id @default(cuid())
-  name          String
-  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime        @default(now()) @map("updated_at") @db.Timestamptz
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  books     Book[]
 
   @@map("category")
 }

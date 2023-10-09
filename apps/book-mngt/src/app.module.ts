@@ -3,18 +3,16 @@ import { ConfigModule } from '@nestjs/config';
 import { BookModule } from './book/book.module';
 import { PrismaModule } from './prisma/prisma.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env`
+      envFilePath: `.env`,
     }),
     BookModule,
-    PrismaModule
+    PrismaModule,
   ],
   controllers: [],
-  providers: [
-  ],
+  providers: [],
 })
-export class AppModule { }
+export class AppModule {}

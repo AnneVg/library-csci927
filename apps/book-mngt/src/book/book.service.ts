@@ -5,13 +5,9 @@ import { UpdateBookInput } from './update-book.input.model';
 
 @Injectable()
 export class BookService {
-
   private logger: Logger = new Logger(this.constructor.name);
 
-  constructor(
-    private readonly prisma: PrismaService
-  ) {
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAllBooks() {
     const books = await this.prisma.book.findMany({});
@@ -21,8 +17,8 @@ export class BookService {
   async getBookById(id: string) {
     const book = this.prisma.book.findUnique({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     return book;
   }
@@ -30,8 +26,8 @@ export class BookService {
   async addBook(createBookInput: CreateBookInput) {
     const dataToInsert = {
       data: {
-        ...createBookInput
-      }
+        ...createBookInput,
+      },
     };
     const book = await this.prisma.book.create(dataToInsert);
     return book;
@@ -40,12 +36,12 @@ export class BookService {
   async updateBook(id: string, updateBookInput: UpdateBookInput) {
     const book = await this.prisma.book.update({
       where: {
-        id: id
+        id: id,
       },
       data: {
         ...updateBookInput,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     });
     return book;
   }
@@ -53,8 +49,8 @@ export class BookService {
   async deleteBook(id: string) {
     await this.prisma.book.delete({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
   }
 }

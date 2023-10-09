@@ -5,13 +5,9 @@ import { UpdateMemberInput } from './update-member.input.model';
 
 @Injectable()
 export class MemberService {
-
   private logger: Logger = new Logger(this.constructor.name);
 
-  constructor(
-    private readonly prisma: PrismaService
-  ) {
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAllMembers() {
     const members = await this.prisma.member.findMany({});
@@ -21,8 +17,8 @@ export class MemberService {
   async getMemberById(id: string) {
     const member = this.prisma.member.findUnique({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     return member;
   }
@@ -30,8 +26,8 @@ export class MemberService {
   async addMember(createMemberInput: CreateMemberInput) {
     const dataToInsert = {
       data: {
-        ...createMemberInput
-      }
+        ...createMemberInput,
+      },
     };
     const member = await this.prisma.member.create(dataToInsert);
     return member;
@@ -40,12 +36,12 @@ export class MemberService {
   async updateMember(id: string, updateMemberInput: UpdateMemberInput) {
     const member = await this.prisma.member.update({
       where: {
-        id: id
+        id: id,
       },
       data: {
         ...updateMemberInput,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     });
     return member;
   }
@@ -53,8 +49,8 @@ export class MemberService {
   async deleteMember(id: string) {
     const count = await this.prisma.member.deleteMany({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
     return count;
   }

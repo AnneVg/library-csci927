@@ -1,5 +1,6 @@
 import {
     DashboardOutlined,
+    ReadOutlined,
     ShopOutlined,
     ShoppingOutlined,
     StarOutlined,
@@ -51,6 +52,7 @@ import { StoreCreate, StoreEdit, StoreList } from "./pages/stores";
 import { UserList, UserShow } from "./pages/users";
 
 import "@refinedev/antd/dist/reset.css";
+import { BookList } from "./pages/books";
 
 const App: React.FC = () => {
     const API_URL = "https://api.finefoods.refine.dev";
@@ -118,17 +120,28 @@ const App: React.FC = () => {
                                 },
                             },
                             {
+                                name: "books",
+                                list: "/books",
+                                meta: {
+                                    icon: <ReadOutlined />,
+                                    dataProviderName: "books"
+                                },
+                            },
+                            {
                                 name: "stores",
                                 list: "/stores",
                                 create: "/stores/create",
                                 edit: "/stores/edit/:id",
                                 meta: {
-                                    icon: <ShopOutlined />,
+                                    icon: <ShopOutlined />
                                 },
                             },
                             {
                                 name: "categories",
                                 list: "/categories",
+                                meta: {
+                                    dataProviderName: "books"
+                                }
                             },
                             {
                                 name: "members",
@@ -198,6 +211,10 @@ const App: React.FC = () => {
                                 <Route
                                     path="/products"
                                     element={<ProductList />}
+                                />
+                                <Route
+                                    path="/books"
+                                    element={<BookList />}
                                 />
 
                                 <Route path="/stores">

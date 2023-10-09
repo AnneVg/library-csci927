@@ -1,3 +1,3 @@
-import { Member } from "./member.model";
+import { Member } from './member.model';
 
-export type UpdateMemberInput = Partial<Member>
+export type UpdateMemberInput = Partial<Member>;

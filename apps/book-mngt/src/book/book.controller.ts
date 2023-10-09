@@ -1,20 +1,26 @@
-import { Controller, Get, Param, Post, Body, Logger, Delete, HttpCode, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Logger,
+  Delete,
+  HttpCode,
+  Patch,
+} from '@nestjs/common';
 import { BookService } from './book.service';
 import { ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
 
-@Controller("books")
+@Controller('books')
 export class BookController {
   private logger: Logger = new Logger(this.constructor.name);
-  constructor(
-    private readonly bookService: BookService,
-  ) { }
+  constructor(private readonly bookService: BookService) {}
 
   @Get(':id')
-  async getBook(
-    @Param('id') id: string,
-  ) {
+  async getBook(@Param('id') id: string) {
     return await this.bookService.getBookById(id);
   }
 
@@ -24,9 +30,7 @@ export class BookController {
   }
 
   @Post()
-  async createBook(
-    @Body() bookInput: CreateBookInput
-  ) {
+  async createBook(@Body() bookInput: CreateBookInput) {
     try {
       const book = await this.bookService.addBook(bookInput);
       return book;
@@ -39,7 +43,7 @@ export class BookController {
   @ApiParam({ name: 'id', description: 'The ID of the book' })
   async updateBook(
     @Param('id') id: string,
-    @Body() bookInput: UpdateBookInput
+    @Body() bookInput: UpdateBookInput,
   ) {
     try {
       if (!id) throw Error('Invalid arguments');
@@ -52,9 +56,7 @@ export class BookController {
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteBook(
-    @Param('id') id: string
-  ) {
+  async deleteBook(@Param('id') id: string) {
     try {
       await this.bookService.deleteBook(id);
     } catch (err) {

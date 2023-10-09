@@ -7,26 +7,20 @@ import { UpdateMemberInput } from './update-member.input.model';
 @Controller()
 export class MemberController {
   private logger: Logger = new Logger(this.constructor.name);
-  constructor(
-    private readonly memberService: MemberService,
-  ) { }
+  constructor(private readonly memberService: MemberService) {}
 
-  @MessagePattern({cmd: 'get_member'})
-  async getMember(
-    id: string,
-  ) {
+  @MessagePattern({ cmd: 'get_member' })
+  async getMember(id: string) {
     return await this.memberService.getMemberById(id);
   }
 
-  @MessagePattern({cmd: 'get_members'})
+  @MessagePattern({ cmd: 'get_members' })
   async getMembers() {
     return await this.memberService.getAllMembers();
   }
 
-  @MessagePattern({cmd: 'create_member'})
-  async createMember(
-    memberInput: CreateMemberInput
-  ) {
+  @MessagePattern({ cmd: 'create_member' })
+  async createMember(memberInput: CreateMemberInput) {
     try {
       const member = await this.memberService.addMember(memberInput);
       return member;
@@ -35,10 +29,8 @@ export class MemberController {
     }
   }
 
-  @MessagePattern({cmd: 'update_member'})
-  async updateMember(
-    memberInput: UpdateMemberInput
-  ) {
+  @MessagePattern({ cmd: 'update_member' })
+  async updateMember(memberInput: UpdateMemberInput) {
     try {
       const { id } = memberInput;
       if (!id) throw Error('Invalid arguments');
@@ -49,10 +41,8 @@ export class MemberController {
     }
   }
 
-  @MessagePattern({cmd: 'delete_member'})
-  async deleteMember(
-    id: string
-  ) {
+  @MessagePattern({ cmd: 'delete_member' })
+  async deleteMember(id: string) {
     try {
       return await this.memberService.deleteMember(id);
     } catch (err) {

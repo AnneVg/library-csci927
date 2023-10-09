@@ -1,5 +1,5 @@
 export class CreateMemberInput {
-    name: string;
-    studentId: string;
-    status: string;
+  name: string;
+  studentId: string;
+  status: string;
 }

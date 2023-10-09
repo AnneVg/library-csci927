@@ -169,3 +169,24 @@ export interface IMember {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface IBookCategory {
+    id: number;
+    name: string;
+}
+
+export interface IBook {
+    id: string;
+    title: string;
+    author: string;
+    isbn: string;
+    shortDescription: string;
+    location: string;
+    category: IBookCategory;
+    stock: number;
+    status:  
+        | "available"
+        | "outofstock"
+    createdAt: Date;
+    updatedAt: Date;
+}

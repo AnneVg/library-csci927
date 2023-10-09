@@ -130,6 +130,7 @@
         },
         "fields": {
             "id": "ID",
+            "name": "Name",
             "title": "Title",
             "isActive": "Active"
         }
@@ -222,6 +223,10 @@
             "active": "Active",
             "blocked": "Blocked",
             "expired": "Expired"
+        },
+        "bookStatuses": {
+            "available": "Available",
+            "outofstock": "Out of stock"
         }
     },
     "orders": {
@@ -426,6 +431,32 @@
         "steps": {
             "content": "Content",
             "relations": "Relations"
+        }
+    },
+    "books": {
+        "books": "Books",
+        "titles": {
+            "list": "Books",
+            "create": "Create Book",
+            "edit": "Edit Book"
+        },
+        "buttons": {
+            "addBook": "Add book"
+        },
+        "fields": {
+            "id": "ID",
+            "title": "Title",
+            "description": "Description",
+            "stock": "Stock",
+            "author": "Author",
+            "category": "Category",
+            "status": "Status",
+            "cover": {
+                "label": "Cover",
+                "description": "Add product cover",
+                "validation": "must be 1080x1080 px"
+            },
+            "createdAt": "CreatedAt"
         }
     }
 }

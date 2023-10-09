@@ -1,32 +1,23 @@
-import { useTranslate, IResourceComponentsProps } from "@refinedev/core";
+import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
 
 import {
     List,
-    useTable,
-    BooleanField,
-    useEditableTable,
     SaveButton,
-    NumberField,
-    DateField,
-    useDrawerForm,
+    useEditableTable
 } from "@refinedev/antd";
 
 import { FormOutlined, MoreOutlined } from "@ant-design/icons";
 import {
-    Table,
-    Space,
-    Form,
     Button,
-    Input,
-    Checkbox,
     Dropdown,
+    Form,
+    Input,
     Menu,
-    Avatar,
-    Grid,
+    Space,
+    Table
 } from "antd";
 
-import { ICategory, IProduct } from "../../interfaces";
-import { EditProduct } from "../../components/product";
+import { IBookCategory } from "../../interfaces";
 
 export const CategoryList: React.FC<IResourceComponentsProps> = () => {
     const {
@@ -36,10 +27,10 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
         saveButtonProps,
         cancelButtonProps,
         setId: setEditId,
-    } = useEditableTable<ICategory>({
+    } = useEditableTable<IBookCategory>({
         initialSorter: [
             {
-                field: "title",
+                field: "name",
                 order: "asc",
             },
         ],
@@ -47,13 +38,13 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
 
     const t = useTranslate();
 
-    const moreMenu = (record: ICategory) => (
+    const moreMenu = (record: IBookCategory) => (
         <Menu
             mode="vertical"
             onClick={({ domEvent }) => domEvent.stopPropagation()}
         >
             <Menu.Item
-                key="accept"
+                key="edit"
                 style={{
                     fontSize: 15,
                     display: "flex",
@@ -78,18 +69,11 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
         </Menu>
     );
 
-    const breakpoint = Grid.useBreakpoint();
-
     return (
         <List>
             <Form {...formProps}>
                 <Table
                     {...tableProps}
-                    expandable={{
-                        expandedRowRender: !breakpoint.xs
-                            ? expandedRowRender
-                            : undefined,
-                    }}
                     rowKey="id"
                     onRow={(record) => ({
                         // eslint-disable-next-line
@@ -101,14 +85,14 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
                     })}
                 >
                     <Table.Column
-                        key="title"
-                        dataIndex="title"
-                        title={t("categories.fields.title")}
-                        render={(value, data: ICategory) => {
+                        key="name"
+                        dataIndex="name"
+                        title={t("categories.fields.name")}
+                        render={(value, data: IBookCategory) => {
                             if (isEditing(data.id)) {
                                 return (
                                     <Form.Item
-                                        name="title"
+                                        name="name"
                                         style={{ margin: 0 }}
                                     >
                                         <Input />
@@ -118,27 +102,7 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
                             return value;
                         }}
                     />
-                    <Table.Column
-                        key="isActive"
-                        dataIndex="isActive"
-                        title={t("categories.fields.isActive")}
-                        /*  render={(value) => <BooleanField value={value} />} */
-                        render={(value, data: ICategory) => {
-                            if (isEditing(data.id)) {
-                                return (
-                                    <Form.Item
-                                        name="isActive"
-                                        style={{ margin: 0 }}
-                                        valuePropName="checked"
-                                    >
-                                        <Checkbox />
-                                    </Form.Item>
-                                );
-                            }
-                            return <BooleanField value={value} />;
-                        }}
-                    />
-                    <Table.Column<ICategory>
+                    <Table.Column<IBookCategory>
                         title={t("table.actions")}
                         dataIndex="actions"
                         key="actions"
@@ -179,135 +143,4 @@ export const CategoryList: React.FC<IResourceComponentsProps> = () => {
             </Form>
         </List>
     );
-};
-
-const CategoryProductsTable: React.FC<{ record: ICategory }> = ({ record }) => {
-    const t = useTranslate();
-
-    const { tableProps: postTableProps } = useTable<IProduct>({
-        resource: "products",
-        permanentFilter: [
-            {
-                field: "category.id",
-                operator: "eq",
-                value: record.id,
-            },
-        ],
-        syncWithLocation: false,
-    });
-
-    const {
-        drawerProps: editDrawerProps,
-        formProps: editFormProps,
-        saveButtonProps: editSaveButtonProps,
-        show: editShow,
-    } = useDrawerForm<IProduct>({
-        action: "edit",
-        resource: "products",
-        redirect: false,
-    });
-
-    const moreMenu = (record: IProduct) => (
-        <Menu
-            mode="vertical"
-            onClick={({ domEvent }) => domEvent.stopPropagation()}
-        >
-            <Menu.Item
-                key="edit"
-                style={{
-                    fontSize: 15,
-                    display: "flex",
-                    alignItems: "center",
-                    fontWeight: 500,
-                }}
-                icon={
-                    <FormOutlined
-                        style={{
-                            color: "#52c41a",
-                            fontSize: 17,
-                            fontWeight: 500,
-                        }}
-                    />
-                }
-                onClick={() => editShow(record.id)}
-            >
-                {t("buttons.edit")}
-            </Menu.Item>
-        </Menu>
-    );
-
-    return (
-        <List title={t("products.products")} createButtonProps={undefined}>
-            <Table {...postTableProps} rowKey="id">
-                <Table.Column
-                    dataIndex="images"
-                    render={(value) => <Avatar size={74} src={value[0].url} />}
-                    width={105}
-                />
-                <Table.Column
-                    key="name"
-                    dataIndex="name"
-                    title={t("products.fields.name")}
-                />
-                <Table.Column
-                    align="right"
-                    key="price"
-                    dataIndex="price"
-                    title={t("products.fields.price")}
-                    render={(value) => {
-                        return (
-                            <NumberField
-                                options={{
-                                    currency: "USD",
-                                    style: "currency",
-                                    notation: "compact",
-                                }}
-                                value={value / 100}
-                            />
-                        );
-                    }}
-                    sorter
-                />
-                <Table.Column
-                    key="isActive"
-                    dataIndex="isActive"
-                    title={t("products.fields.isActive")}
-                    render={(value) => <BooleanField value={value} />}
-                />
-                <Table.Column
-                    key="createdAt"
-                    dataIndex="createdAt"
-                    title={t("products.fields.createdAt")}
-                    render={(value) => <DateField value={value} format="LLL" />}
-                    sorter
-                />
-                <Table.Column<IProduct>
-                    dataIndex="products_actions"
-                    title={t("table.actions")}
-                    render={(_, record) => (
-                        <Dropdown
-                            overlay={moreMenu(record)}
-                            trigger={["click"]}
-                        >
-                            <MoreOutlined
-                                onClick={(e) => e.stopPropagation()}
-                                style={{
-                                    fontSize: 24,
-                                }}
-                            />
-                        </Dropdown>
-                    )}
-                />
-            </Table>
-            <EditProduct
-                drawerProps={editDrawerProps}
-                formProps={editFormProps}
-                saveButtonProps={editSaveButtonProps}
-            />
-        </List>
-    );
-};
-
-const expandedRowRender = (record: ICategory) => {
-    return <CategoryProductsTable record={record} />;
 };

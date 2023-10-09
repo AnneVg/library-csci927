@@ -13,13 +13,10 @@ import {
     Form,
     Input,
     Radio,
-    Row,
-    Typography
+    Row
 } from "antd";
 
 import { IMember } from "../../interfaces";
-
-const { Text } = Typography;
 
 export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
@@ -41,24 +38,13 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
                     style={{ marginTop: 30 }}
                     layout="vertical"
                     initialValues={{
-                        isActive: true,
+                        status: 'active',
                     }}
                 >
                     <Row gutter={20}>
                         <Col xs={24} lg={16}>
                             <Row gutter={10}>
                                 <Col xs={24} lg={16}>
-                                    <Form.Item
-                                        label={t("members.fields.name")}
-                                        name="name"
-                                        rules={[
-                                            {
-                                                required: true,
-                                            },
-                                        ]}
-                                    >
-                                        <Input />
-                                    </Form.Item>
                                     <Form.Item
                                         label={t("members.fields.studentId")}
                                         name="studentId"
@@ -71,8 +57,24 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
+                                        label={t("members.fields.name")}
+                                        name="name"
+                                        rules={[
+                                            {
+                                                required: true,
+                                            },
+                                        ]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
                                         label={t("members.fields.status")}
                                         name="status"
+                                        rules={[
+                                            {
+                                                required: true,
+                                            },
+                                        ]}
                                     >
                                         <Radio.Group>
                                             <Radio value={'active'}>{t("enum.memberStatuses.active")}</Radio>

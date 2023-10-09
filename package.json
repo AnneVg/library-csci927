@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build --include-dependencies",
-    "build:api": "turbo run build --filter=@bcpros/lixi-gitbot-api",
-    "db:deploy": "turbo run db:deploy --filter=@bcrpos/lixi-gitbot-db",
+    "build:api": "turbo run build --filter=*-mngt",
+    "db:deploy": "turbo run db:deploy --filter=library-db",
     "format": "turbo run format",
     "prepare": "husky install"
   }
