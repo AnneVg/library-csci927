@@ -169,6 +169,18 @@ export interface IMember {
     createdAt: Date;
     updatedAt: Date;
 }
+export interface IBorrow {
+    id: string;
+    studentId: string;
+    bookId: string;
+    duedate: Date;
+    status:  
+        | "onloan"
+        | "returned"
+        | "overdue";
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 export interface IBookCategory {
     id: number;

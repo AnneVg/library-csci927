@@ -1,4 +1,5 @@
 import {
+    BoldOutlined,
     DashboardOutlined,
     ReadOutlined,
     ShopOutlined,
@@ -41,6 +42,7 @@ import {
 } from "./pages/couriers";
 import { DashboardPage } from "./pages/dashboard";
 import {
+    BorrowCreate,
     MemberCreate,
     MemberEdit,
     MemberList,
@@ -53,6 +55,7 @@ import { UserList, UserShow } from "./pages/users";
 
 import "@refinedev/antd/dist/reset.css";
 import { BookList } from "./pages/books";
+import { BorrowList } from "./pages/borrow";
 
 const App: React.FC = () => {
     const API_URL = "https://api.finefoods.refine.dev";
@@ -113,6 +116,16 @@ const App: React.FC = () => {
                                     dataProviderName: "books"
                                 },
                             },
+                            {
+                                name: "borrows",
+                                list: "/borrows",
+                                create: "/borrows/create",
+                                edit: "/borrows/edit/:id",
+                                meta: {
+                                    icon: <BoldOutlined />,
+                                    dataProviderName: "borrows"
+                                },
+                            },
                         
                         ]}
                     >
@@ -157,6 +170,18 @@ const App: React.FC = () => {
                                         path="edit/:id"
                                         element={<MemberEdit />}
                                     />
+                                 
+                                </Route>
+                                <Route path="/borrows">
+                                    <Route index element={<BorrowList />} />
+                                    <Route
+                                        path="create"
+                                        element={<BorrowCreate />}
+                                    />
+                                    {/* <Route
+                                        path="edit/:id"
+                                        element={<BorrowEdit />}
+                                    /> */}
                                  
                                 </Route>
 

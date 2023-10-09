@@ -48,18 +48,15 @@ model Category {
 }
 
 model BorrowingBook {
-  id               String   @id @default(cuid())
-  bookId           String   @map("book_id")
-  book             Book     @relation(fields: [bookId], references: [id])
-  memberId         String   @map("member_id")
-  member           Member   @relation(fields: [memberId], references: [id])
-  isbn             String
-  shortDescription String   @map("short_description")
-  category         String
-  location         String
-  status           String
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  id        String   @id @default(cuid())
+  bookId    String   @map("book_id")
+  book      Book     @relation(fields: [bookId], references: [id])
+  memberId  String   @map("member_id")
+  member    Member   @relation(fields: [memberId], references: [id])
+  dueDate   DateTime @map("due_date") @db.Timestamptz
+  status    String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz
 
   @@map("borrowing_book")
 }

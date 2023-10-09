@@ -1,8 +1,7 @@
 import {
-    Create,
+    Edit,
     useForm
 } from "@refinedev/antd";
-
 import {
     IResourceComponentsProps,
     useApiUrl,
@@ -12,24 +11,26 @@ import {
     Col,
     Form,
     Input,
-    Radio,
-    Row
+    Row,
+    Radio
 } from "antd";
 
-import { IBorrow } from "../../interfaces";
+import { IMember } from "../../interfaces";
 
-export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+
+export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
     const {
         formProps,
         saveButtonProps,
         queryResult,
-    } = useForm<IBorrow>();
+    } = useForm<IMember>();
+    const memberData = queryResult?.data?.data;
     const apiUrl = useApiUrl('books');
 
     return (
         <>
-            <Create
+            <Edit
                 isLoading={queryResult?.isFetching}
                 saveButtonProps={saveButtonProps}
             >
@@ -38,7 +39,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                     style={{ marginTop: 30 }}
                     layout="vertical"
                     initialValues={{
-                        status: 'active',
+                        ...formProps.initialValues,
                     }}
                 >
                     <Row gutter={20}>
@@ -46,8 +47,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                             <Row gutter={10}>
                                 <Col xs={24} lg={16}>
                                     <Form.Item
-                                        label={t("borrows.fields.memberId")}
-                                        name="memberId"
+                                        label={t("members.fields.studentId")}
+                                        name="studentId"
                                         rules={[
                                             {
                                                 required: true,
@@ -57,8 +58,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
-                                        label={t("borrows.fields.bookId")}
-                                        name="bookId"
+                                        label={t("members.fields.name")}
+                                        name="name"
                                         rules={[
                                             {
                                                 required: true,
@@ -68,7 +69,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
-                                        label={t("borrows.fields.status")}
+                                        label={t("members.fields.status")}
                                         name="status"
                                         rules={[
                                             {
@@ -77,12 +78,12 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         ]}
                                     >
                                         <Radio.Group>
-                                            <Radio value={'onloan'}>{t("enum.borrowStatuses.onloan")}</Radio>
-                                            <Radio value={'returned'}>
-                                                {t("enum.borrowStatuses.returned")}
+                                            <Radio value={'active'}>{t("enum.memberStatuses.active")}</Radio>
+                                            <Radio value={'blocked'}>
+                                                {t("enum.memberStatuses.blocked")}
                                             </Radio>
-                                            <Radio value={'overdue'}>
-                                                {t("enum.borrowStatuses.overdue")}
+                                            <Radio value={'expired'}>
+                                                {t("enum.memberStatuses.expired")}
                                             </Radio>
                                         </Radio.Group>
                                     </Form.Item>
@@ -91,7 +92,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                         </Col>
                     </Row>
                 </Form>
-            </Create>
+            </Edit>
         </>
     );
 };

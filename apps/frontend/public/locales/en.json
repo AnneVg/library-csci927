@@ -459,5 +459,32 @@
             },
             "createdAt": "CreatedAt"
         }
+    },
+    "borrows": {
+        "borrows": "Borrowing Book",
+        "titles": {
+            "create": "Create new borrow",
+            "list": "borrows",
+            "edit": "Edit borrow"
+        },
+        "fields": {
+            "id": "ID",
+            "name": "Name",
+            "memberId": "Member Id",
+            "bookId": "Book Id",
+            "status": "Status",
+            "duedate": "Status",
+            "createdAt": "CreatedAt",
+            "isActive": "Is Active",
+            "images": {
+                "label": "Images",
+                "description": "Add user picture",
+                "validation": "must be 480x480 px"
+            }
+        },
+        "steps": {
+            "content": "Content",
+            "relations": "Relations"
+        }
     }
 }
