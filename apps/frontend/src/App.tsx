@@ -89,51 +89,11 @@ const App: React.FC = () => {
                         notificationProvider={notificationProvider}
                         resources={[
                             {
-                                name: "dashboard",
-                                list: "/",
-                                meta: {
-                                    label: "Dashboard",
-                                    icon: <DashboardOutlined />,
-                                },
-                            },
-                            {
-                                name: "orders",
-                                list: "/orders",
-                                show: "/orders/show/:id",
-                                meta: {
-                                    icon: <ShoppingOutlined />,
-                                },
-                            },
-                            {
-                                name: "users",
-                                list: "/users",
-                                show: "/users/show/:id",
-                                meta: {
-                                    icon: <UsergroupAddOutlined />,
-                                },
-                            },
-                            {
-                                name: "products",
-                                list: "/products",
-                                meta: {
-                                    icon: <PizzaIcon />,
-                                },
-                            },
-                            {
                                 name: "books",
                                 list: "/books",
                                 meta: {
                                     icon: <ReadOutlined />,
                                     dataProviderName: "books"
-                                },
-                            },
-                            {
-                                name: "stores",
-                                list: "/stores",
-                                create: "/stores/create",
-                                edit: "/stores/edit/:id",
-                                meta: {
-                                    icon: <ShopOutlined />
                                 },
                             },
                             {
@@ -153,23 +113,7 @@ const App: React.FC = () => {
                                     dataProviderName: "books"
                                 },
                             },
-                            {
-                                name: "couriers",
-                                list: "/couriers",
-                                create: "/couriers/create",
-                                edit: "/couriers/edit/:id",
-                                show: "/couriers/show/:id",
-                                meta: {
-                                    icon: <BikeWhiteIcon />,
-                                },
-                            },
-                            {
-                                name: "reviews",
-                                list: "/reviews",
-                                meta: {
-                                    icon: <StarOutlined />,
-                                },
-                            }
+                        
                         ]}
                     >
                         <Routes>
@@ -190,44 +134,13 @@ const App: React.FC = () => {
                                     </Authenticated>
                                 }
                             >
-                                <Route index element={<DashboardPage />} />
-
-                                <Route path="/orders">
-                                    <Route index element={<OrderList />} />
-                                    <Route
-                                        path="show/:id"
-                                        element={<OrderShow />}
-                                    />
-                                </Route>
-
-                                <Route path="/users">
-                                    <Route index element={<UserList />} />
-                                    <Route
-                                        path="show/:id"
-                                        element={<UserShow />}
-                                    />
-                                </Route>
-
-                                <Route
-                                    path="/products"
-                                    element={<ProductList />}
-                                />
+                                
                                 <Route
                                     path="/books"
                                     element={<BookList />}
                                 />
 
-                                <Route path="/stores">
-                                    <Route index element={<StoreList />} />
-                                    <Route
-                                        path="create"
-                                        element={<StoreCreate />}
-                                    />
-                                    <Route
-                                        path="edit/:id"
-                                        element={<StoreEdit />}
-                                    />
-                                </Route>
+                               
 
                                 <Route
                                     path="/categories"
@@ -247,7 +160,7 @@ const App: React.FC = () => {
                                  
                                 </Route>
 
-                                <Route path="/couriers">
+                               
                                     <Route index element={<CourierList />} />
                                     <Route
                                         path="create"
@@ -261,7 +174,7 @@ const App: React.FC = () => {
                                         path="show/:id"
                                         element={<CourierShow />}
                                     />
-                                </Route>
+                               
 
                                 <Route
                                     path="/reviews"

@@ -36,7 +36,7 @@ async function main() {
                 where: {
                     id: member.id,
                 },
-                update: {...members},
+                update: {...member},
                 create: { ...member }
             })
         )
