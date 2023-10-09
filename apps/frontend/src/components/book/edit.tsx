@@ -16,8 +16,6 @@ import {
 
 import { IBookCategory } from "../../interfaces";
 
-const { Text } = Typography;
-
 type EditBookProps = {
     drawerProps: DrawerProps;
     formProps: FormProps;
@@ -37,7 +35,8 @@ export const EditBook: React.FC<EditBookProps> = ({
 
     const { selectProps: categorySelectProps } = useSelect<IBookCategory>({
         resource: "categories",
-        optionValue: "name"
+        optionValue: "id",
+        optionLabel: "name"
     });
 
     return (
@@ -98,7 +97,7 @@ export const EditBook: React.FC<EditBookProps> = ({
                     </Form.Item>
                     <Form.Item
                         label={t("books.fields.category")}
-                        name={["category", "id"]}
+                        name="categoryId"
                         rules={[
                             {
                                 required: true,

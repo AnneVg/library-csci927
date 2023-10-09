@@ -32,7 +32,7 @@ export const BookList: React.FC<IResourceComponentsProps> = () => {
             const bookFilters: CrudFilters = [];
 
             bookFilters.push({
-                field: "category.id",
+                field: "categoryId",
                 operator: "in",
                 value: categories?.length > 0 ? categories : undefined,
             });
@@ -79,7 +79,7 @@ export const BookList: React.FC<IResourceComponentsProps> = () => {
                 }}
                 initialValues={{
                     title: getDefaultFilter("title", filters, "contains"),
-                    categories: getDefaultFilter("category.id", filters, "in"),
+                    categories: getDefaultFilter("categoryId", filters, "in"),
                 }}
             >
                 <Row gutter={[16, 16]}>

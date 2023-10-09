@@ -2,15 +2,45 @@ import { Injectable, Logger, Patch } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
+import { Prisma } from 'database';
 
 @Injectable()
 export class BookService {
   private logger: Logger = new Logger(this.constructor.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
-  async getAllBooks() {
-    const books = await this.prisma.book.findMany({});
+  async getAllBooks(limit: number, offset: number, categoryIds: string[], query?: string) {
+    const whereCondition: Prisma.BookWhereInput = query ? {
+      
+      OR: [
+        {
+          title: {
+            contains: query,
+            mode: 'insensitive'
+
+          }
+        },
+        {
+          author: {
+            contains: query,
+            mode: 'insensitive'
+          }
+        },
+        {
+          shortDescription: {
+            contains: query,
+            mode: 'insensitive'
+          }
+        }
+      ]
+    } : {};
+    const books = await this.prisma.book.findMany({
+      take: Number(limit),
+      skip: Number(offset),
+      where: whereCondition
+    });
+
     return books;
   }
 

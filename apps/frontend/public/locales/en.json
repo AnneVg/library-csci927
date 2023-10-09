@@ -435,6 +435,7 @@
     },
     "books": {
         "books": "Books",
+        "bookSearch": "Book Search",
         "titles": {
             "list": "Books",
             "create": "Create Book",

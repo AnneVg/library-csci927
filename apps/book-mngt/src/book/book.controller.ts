@@ -1,16 +1,17 @@
 import {
-  Controller,
-  Get,
-  Param,
-  Post,
   Body,
-  Logger,
+  Controller,
   Delete,
+  Get,
   HttpCode,
+  Logger,
+  Param,
   Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
+import { ApiParam } from '@nestjs/swagger';
 import { BookService } from './book.service';
-import { ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
 
@@ -25,8 +26,15 @@ export class BookController {
   }
 
   @Get()
-  async getBooks() {
-    return await this.bookService.getAllBooks();
+  async getBooks(
+    @Query('_start') _start: number,
+    @Query('_end') _end: number,
+    @Query('name_like') query: string,
+    @Query('categoryId') categoryIds: string[]
+  ) {
+    const limit = _end - _start;
+    const offset = _start;
+    return await this.bookService.getAllBooks(limit, offset, categoryIds, query);
   }
 
   @Post()
