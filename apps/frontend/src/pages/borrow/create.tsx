@@ -46,8 +46,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                             <Row gutter={10}>
                                 <Col xs={24} lg={16}>
                                     <Form.Item
-                                        label={t("borrows.fields.memberId")}
-                                        name="memberId"
+                                        label={t("borrows.fields.studentId")}
+                                        name="studentId"
                                         rules={[
                                             {
                                                 required: true,
@@ -77,13 +77,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         ]}
                                     >
                                         <Radio.Group>
-                                            <Radio value={'onloan'}>{t("enum.borrowStatuses.onloan")}</Radio>
-                                            <Radio value={'returned'}>
-                                                {t("enum.borrowStatuses.returned")}
-                                            </Radio>
-                                            <Radio value={'overdue'}>
-                                                {t("enum.borrowStatuses.overdue")}
-                                            </Radio>
+                                            <Radio value={'onloan'} defaultChecked={true} checked={true}>{t("enum.borrowStatuses.onloan") } </Radio>
                                         </Radio.Group>
                                     </Form.Item>
                                 </Col>

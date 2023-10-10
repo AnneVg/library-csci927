@@ -130,7 +130,7 @@ export const BookItem: React.FC<BookItemProps> = ({
                         color: "#999999",
                     }}
                 >
-                    {item.author}
+                    {item.isbn}
                 </Text>
                 {updateStock && (
                     <div id="stock-number">

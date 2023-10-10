@@ -70,6 +70,43 @@ export const EditBook: React.FC<EditBookProps> = ({
                     >
                         <Input />
                     </Form.Item>
+
+                    <Form.Item
+                        label={t("books.fields.isbn")}
+                        name="isbn"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={t("books.fields.author")}
+                        name="author"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={t("books.fields.location")}
+                        name="location"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
                     <Form.Item
                         label={t("books.fields.description")}
                         name="shortDescription"
@@ -81,6 +118,7 @@ export const EditBook: React.FC<EditBookProps> = ({
                     >
                         <Input.TextArea rows={6} />
                     </Form.Item>
+
                     <Form.Item
                         label={t("books.fields.stock")}
                         name="stock"

@@ -63,6 +63,17 @@ export const CreateBook: React.FC<CreateBookProps> = ({
                     }}
                 >
                     <Form.Item
+                        label={t("books.fields.category")}
+                        name="categoryId"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Select {...categorySelectProps} />
+                    </Form.Item>
+                    <Form.Item
                         label={t("books.fields.title")}
                         name="title"
                         rules={[
@@ -73,17 +84,43 @@ export const CreateBook: React.FC<CreateBookProps> = ({
                     >
                         <Input />
                     </Form.Item>
+
                     <Form.Item
-                        label={t("books.fields.description")}
-                        name="shortDescription"
+                        label={t("books.fields.isbn")}
+                        name="isbn"
                         rules={[
                             {
                                 required: true,
                             },
                         ]}
                     >
-                        <Input.TextArea rows={6} />
+                        <Input />
                     </Form.Item>
+
+                    <Form.Item
+                        label={t("books.fields.author")}
+                        name="author"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={t("books.fields.location")}
+                        name="location"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+
                     <Form.Item
                         label={t("books.fields.stock")}
                         name="stock"
@@ -100,16 +137,19 @@ export const CreateBook: React.FC<CreateBookProps> = ({
                         />
                     </Form.Item>
                     <Form.Item
-                        label={t("books.fields.category")}
-                        name="categoryId"
+                        label={t("books.fields.description")}
+                        name="shortDescription"
                         rules={[
                             {
                                 required: true,
                             },
                         ]}
                     >
-                        <Select {...categorySelectProps} />
+                        <Input.TextArea rows={6} />
                     </Form.Item>
+
+
+
                     <Form.Item
                         label={t("books.fields.status")}
                         name="status"

@@ -227,6 +227,11 @@
         "bookStatuses": {
             "available": "Available",
             "outofstock": "Out of stock"
+        },
+        "borrowStatuses": {
+            "onloan": "On loan",
+            "overdue": "Over due",
+            "returned": "Returned"
         }
     },
     "orders": {
@@ -447,9 +452,11 @@
         "fields": {
             "id": "ID",
             "title": "Title",
+            "isbn": "ISBN",
             "description": "Description",
             "stock": "Stock",
             "author": "Author",
+            "location": "Location",
             "category": "Category",
             "status": "Status",
             "cover": {

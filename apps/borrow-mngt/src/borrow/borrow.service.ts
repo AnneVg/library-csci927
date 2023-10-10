@@ -23,9 +23,26 @@ export class BorrowService {
   }
 
   async addBorrow(createBorrowInput: CreateBorrowInput) {
+    const student = await this.prisma.member.findFirst({
+      where: {
+        studentId: createBorrowInput.studentId
+      }
+    });
+    if (!student) throw Error('Invalid student');
+
+    const book = await this.prisma.book.findFirst({
+      where: {
+        isbn: createBorrowInput.isbn
+      }
+    });
+    if (!book) throw Error('Invalid book');
+
     const dataToInsert = {
       data: {
-        ...createBorrowInput
+        dueDate: new Date(),
+        status: 'onloan',
+        bookId: book.id,
+        memberId: student.id
       },
     };
     const borrow = await this.prisma.borrowingBook.create(dataToInsert);

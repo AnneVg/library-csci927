@@ -1,6 +1,6 @@
 export class CreateBorrowInput {
-  bookId: string;
-  memberId: string;
-  status: string;
-  dueDate: Date;
+  studentId: string;
+  isbn: string;
+  // status: string;
+  // dueDate: Date;
 }
