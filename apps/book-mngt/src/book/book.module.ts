@@ -7,6 +7,7 @@ import { BookService } from './book.service';
 import { MemberController } from './member.controller';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
+import { BorrowController } from './borrow.controller';
 
 @Module({
   imports: [PrismaModule],
@@ -26,7 +27,25 @@ import { CategoryController } from './category.controller';
         });
       },
     },
+    {
+      provide: 'BORROWS_SERVICE',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get('BORROW_SERVICE_HOST'),
+            port: configService.get('BORROW_SERVICE_PORT'),
+          },
+        });
+      }
+    }
   ],
-  controllers: [CategoryController, BookController, MemberController],
+  controllers: [
+    CategoryController, 
+    BookController, 
+    MemberController,
+    BorrowController
+  ],
 })
 export class BookModule {}

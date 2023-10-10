@@ -1,12 +1,7 @@
 import {
     BoldOutlined,
-    DashboardOutlined,
     ReadOutlined,
-    ShopOutlined,
-    ShoppingOutlined,
-    StarOutlined,
-    UserOutlined,
-    UsergroupAddOutlined
+    UserOutlined
 } from "@ant-design/icons";
 import {
     ErrorComponent,
@@ -30,7 +25,6 @@ import "dayjs/locale/de";
 
 import { useTranslation } from "react-i18next";
 import { Header, OffLayoutArea, Title } from "./components";
-import { BikeWhiteIcon, PizzaIcon } from "./components/icons";
 import { ConfigProvider } from "./context";
 import { AuthPage } from "./pages/auth";
 import { CategoryList } from "./pages/categories";
@@ -40,22 +34,16 @@ import {
     CourierList,
     CourierShow,
 } from "./pages/couriers";
-import { DashboardPage } from "./pages/dashboard";
 import {
-    BorrowCreate,
     MemberCreate,
     MemberEdit,
     MemberList,
 } from "./pages/members";
-import { OrderList, OrderShow } from "./pages/orders";
-import { ProductList } from "./pages/products";
 import { ReviewsList } from "./pages/reviews";
-import { StoreCreate, StoreEdit, StoreList } from "./pages/stores";
-import { UserList, UserShow } from "./pages/users";
 
 import "@refinedev/antd/dist/reset.css";
 import { BookList } from "./pages/books";
-import { BorrowList } from "./pages/borrow";
+import { BorrowCreate, BorrowList } from "./pages/borrow";
 
 const App: React.FC = () => {
     const API_URL = "https://api.finefoods.refine.dev";
@@ -123,7 +111,7 @@ const App: React.FC = () => {
                                 edit: "/borrows/edit/:id",
                                 meta: {
                                     icon: <BoldOutlined />,
-                                    dataProviderName: "borrows"
+                                    dataProviderName: "books"
                                 },
                             },
                         

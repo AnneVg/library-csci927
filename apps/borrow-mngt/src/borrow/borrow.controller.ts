@@ -9,15 +9,15 @@ export class BorrowController {
   private logger: Logger = new Logger(this.constructor.name);
   constructor(private readonly borrowService: BorrowService) {}
 
-  // @MessagePattern({ cmd: 'get_borrow' })
-  // async getBorrow(id: string) {
-  //   return await this.borrowService.getBorrowById(id);
-  // }
+  @MessagePattern({ cmd: 'get_borrow' })
+  async getBorrow(id: string) {
+    return await this.borrowService.getBorrowById(id);
+  }
 
-  // @MessagePattern({ cmd: 'get_borrows' })
-  // async getBorrows() {
-  //   return await this.borrowService.getAllBorrows();
-  // }
+  @MessagePattern({ cmd: 'get_borrows' })
+  async getBorrows() {
+    return await this.borrowService.getAllBorrows();
+  }
 
   @MessagePattern({ cmd: 'create_borrow' })
   async createBorrow(borrowInput: CreateBorrowInput) {

@@ -1,0 +1,538 @@
+diff --git a/apps/book-mngt/env.example b/apps/book-mngt/env.example
+index 83508ac..8581263 100644
+--- a/apps/book-mngt/env.example
++++ b/apps/book-mngt/env.example
+@@ -1,3 +1,5 @@
+ PORT=4200
+ MEMBER_SERVICE_HOST=localhost
+-MEMBER_SERVICE_PORT=4201
+\ No newline at end of file
++MEMBER_SERVICE_PORT=4201
++BORROW_SERVICE_HOST=localhost
++BORROW_SERVICE_PORT=4202
+\ No newline at end of file
+diff --git a/apps/book-mngt/src/book/book.module.ts b/apps/book-mngt/src/book/book.module.ts
+index 8bd3cb9..d7a9deb 100644
+--- a/apps/book-mngt/src/book/book.module.ts
++++ b/apps/book-mngt/src/book/book.module.ts
+@@ -7,6 +7,7 @@ import { BookService } from './book.service';
+ import { MemberController } from './member.controller';
+ import { CategoryService } from './category.service';
+ import { CategoryController } from './category.controller';
++import { BorrowController } from './borrow.controller';
+ 
+ @Module({
+   imports: [PrismaModule],
+@@ -26,7 +27,25 @@ import { CategoryController } from './category.controller';
+         });
+       },
+     },
++    {
++      provide: 'BORROWS_SERVICE',
++      inject: [ConfigService],
++      useFactory: (configService: ConfigService) => {
++        return ClientProxyFactory.create({
++          transport: Transport.TCP,
++          options: {
++            host: configService.get('BORROW_SERVICE_HOST'),
++            port: configService.get('BORROW_SERVICE_PORT'),
++          },
++        });
++      }
++    }
++  ],
++  controllers: [
++    CategoryController, 
++    BookController, 
++    MemberController,
++    BorrowController
+   ],
+-  controllers: [CategoryController, BookController, MemberController],
+ })
+ export class BookModule {}
+diff --git a/apps/book-mngt/src/book/borrow.controller.ts b/apps/book-mngt/src/book/borrow.controller.ts
+new file mode 100644
+index 0000000..bc05cd8
+--- /dev/null
++++ b/apps/book-mngt/src/book/borrow.controller.ts
+@@ -0,0 +1,62 @@
++import {
++    Body,
++    Controller,
++    Get,
++    Inject,
++    Logger,
++    OnApplicationBootstrap,
++    Param,
++    Post
++} from '@nestjs/common';
++import { ClientProxy } from '@nestjs/microservices';
++import { map } from 'rxjs/operators';
++import { ICreateBorrowInput } from '../interfaces/borrow';
++  
++  @Controller('members')
++  export class BorrowController implements OnApplicationBootstrap {
++    private logger: Logger = new Logger(this.constructor.name);
++    constructor(
++      @Inject('BORROWS_SERVICE') private borrowClientApp: ClientProxy,
++    ) {}
++  
++    async onApplicationBootstrap() {
++      await this.borrowClientApp.connect();
++    }
++  
++    @Get(':id')
++    async getBorrow(@Param('id') id: string) {
++      const pattern = { cmd: 'get_borrow' };
++      try {
++        return await this.borrowClientApp
++          .send<string>(pattern, id)
++          .pipe(map((message) => message));
++      } catch (err) {
++        this.logger.error(err);
++      }
++    }
++  
++    @Get()
++    async getBorrows() {
++      const pattern = { cmd: 'get_borrows' };
++      try {
++        return await this.borrowClientApp
++          .send(pattern, {})
++          .pipe(map((message) => message));
++      } catch (err) {
++        this.logger.error(err);
++      }
++    }
++  
++    @Post()
++    async createBorrow(@Body() borrowInput: ICreateBorrowInput) {
++      try {
++        const pattern = { cmd: 'create_member' };
++        return await this.borrowClientApp
++          .send(pattern, borrowInput)
++          .pipe(map((message) => message));
++      } catch (err) {
++        this.logger.error(err);
++      }
++    }
++  }
++  
+\ No newline at end of file
+diff --git a/apps/book-mngt/src/interfaces/borrow.ts b/apps/book-mngt/src/interfaces/borrow.ts
+new file mode 100644
+index 0000000..b78323a
+--- /dev/null
++++ b/apps/book-mngt/src/interfaces/borrow.ts
+@@ -0,0 +1,6 @@
++export interface ICreateBorrowInput {
++    bookId: string;
++    memberId: string;
++    status: string;
++    dueDate: Date;
++}
+\ No newline at end of file
+diff --git a/apps/borrow-mngt/src/borrow/borrow.controller.ts b/apps/borrow-mngt/src/borrow/borrow.controller.ts
+index 4f75b1f..07d9da7 100644
+--- a/apps/borrow-mngt/src/borrow/borrow.controller.ts
++++ b/apps/borrow-mngt/src/borrow/borrow.controller.ts
+@@ -9,15 +9,15 @@ export class BorrowController {
+   private logger: Logger = new Logger(this.constructor.name);
+   constructor(private readonly borrowService: BorrowService) {}
+ 
+-  // @MessagePattern({ cmd: 'get_borrow' })
+-  // async getBorrow(id: string) {
+-  //   return await this.borrowService.getBorrowById(id);
+-  // }
++  @MessagePattern({ cmd: 'get_borrow' })
++  async getBorrow(id: string) {
++    return await this.borrowService.getBorrowById(id);
++  }
+ 
+-  // @MessagePattern({ cmd: 'get_borrows' })
+-  // async getBorrows() {
+-  //   return await this.borrowService.getAllBorrows();
+-  // }
++  @MessagePattern({ cmd: 'get_borrows' })
++  async getBorrows() {
++    return await this.borrowService.getAllBorrows();
++  }
+ 
+   @MessagePattern({ cmd: 'create_borrow' })
+   async createBorrow(borrowInput: CreateBorrowInput) {
+diff --git a/apps/borrow-mngt/src/borrow/borrow.service.ts b/apps/borrow-mngt/src/borrow/borrow.service.ts
+index 8240151..406ecfb 100644
+--- a/apps/borrow-mngt/src/borrow/borrow.service.ts
++++ b/apps/borrow-mngt/src/borrow/borrow.service.ts
+@@ -8,19 +8,19 @@ export class BorrowService {
+ 
+   constructor(private readonly prisma: PrismaService) {}
+ 
+-  // async getAllBorrows() {
+-  //   const borrows = await this.prisma.borrow.findMany({});
+-  //   return borrows;
+-  // }
++  async getAllBorrows() {
++    const borrows = await this.prisma.borrowingBook.findMany({});
++    return borrows;
++  }
+ 
+-  // async getMemberById(id: string) {
+-  //   const borrow = this.prisma.borrow.findUnique({
+-  //     where: {
+-  //       id: id,
+-  //     },
+-  //   });
+-  //   return borrow;
+-  // }
++  async getBorrowById(id: string) {
++    const borrow = this.prisma.borrowingBook.findUnique({
++      where: {
++        id: id,
++      },
++    });
++    return borrow;
++  }
+ 
+   async addBorrow(createBorrowInput: CreateBorrowInput) {
+     const dataToInsert = {
+diff --git a/apps/frontend/src/App.tsx b/apps/frontend/src/App.tsx
+index 9db31d8..b3c882e 100644
+--- a/apps/frontend/src/App.tsx
++++ b/apps/frontend/src/App.tsx
+@@ -1,12 +1,7 @@
+ import {
+     BoldOutlined,
+-    DashboardOutlined,
+     ReadOutlined,
+-    ShopOutlined,
+-    ShoppingOutlined,
+-    StarOutlined,
+-    UserOutlined,
+-    UsergroupAddOutlined
++    UserOutlined
+ } from "@ant-design/icons";
+ import {
+     ErrorComponent,
+@@ -30,7 +25,6 @@ import "dayjs/locale/de";
+ 
+ import { useTranslation } from "react-i18next";
+ import { Header, OffLayoutArea, Title } from "./components";
+-import { BikeWhiteIcon, PizzaIcon } from "./components/icons";
+ import { ConfigProvider } from "./context";
+ import { AuthPage } from "./pages/auth";
+ import { CategoryList } from "./pages/categories";
+@@ -40,22 +34,16 @@ import {
+     CourierList,
+     CourierShow,
+ } from "./pages/couriers";
+-import { DashboardPage } from "./pages/dashboard";
+ import {
+-    BorrowCreate,
+     MemberCreate,
+     MemberEdit,
+     MemberList,
+ } from "./pages/members";
+-import { OrderList, OrderShow } from "./pages/orders";
+-import { ProductList } from "./pages/products";
+ import { ReviewsList } from "./pages/reviews";
+-import { StoreCreate, StoreEdit, StoreList } from "./pages/stores";
+-import { UserList, UserShow } from "./pages/users";
+ 
+ import "@refinedev/antd/dist/reset.css";
+ import { BookList } from "./pages/books";
+-import { BorrowList } from "./pages/borrow";
++import { BorrowCreate, BorrowList } from "./pages/borrow";
+ 
+ const App: React.FC = () => {
+     const API_URL = "https://api.finefoods.refine.dev";
+@@ -123,7 +111,7 @@ const App: React.FC = () => {
+                                 edit: "/borrows/edit/:id",
+                                 meta: {
+                                     icon: <BoldOutlined />,
+-                                    dataProviderName: "borrows"
++                                    dataProviderName: "books"
+                                 },
+                             },
+                         
+diff --git a/apps/frontend/src/pages/borrow/create.tsx b/apps/frontend/src/pages/borrow/create.tsx
+index b66a13d..285d82d 100644
+--- a/apps/frontend/src/pages/borrow/create.tsx
++++ b/apps/frontend/src/pages/borrow/create.tsx
+@@ -16,15 +16,15 @@ import {
+     Row
+ } from "antd";
+ 
+-import { IMember } from "../../interfaces";
++import { IBorrow } from "../../interfaces";
+ 
+-export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
++export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+     const t = useTranslate();
+     const {
+         formProps,
+         saveButtonProps,
+         queryResult,
+-    } = useForm<IMember>();
++    } = useForm<IBorrow>();
+     const apiUrl = useApiUrl('books');
+ 
+     return (
+@@ -46,8 +46,8 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
+                             <Row gutter={10}>
+                                 <Col xs={24} lg={16}>
+                                     <Form.Item
+-                                        label={t("members.fields.studentId")}
+-                                        name="studentId"
++                                        label={t("borrows.fields.memberId")}
++                                        name="memberId"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -57,8 +57,8 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("members.fields.name")}
+-                                        name="name"
++                                        label={t("borrows.fields.bookId")}
++                                        name="bookId"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -68,7 +68,7 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("members.fields.status")}
++                                        label={t("borrows.fields.status")}
+                                         name="status"
+                                         rules={[
+                                             {
+@@ -77,12 +77,12 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
+                                         ]}
+                                     >
+                                         <Radio.Group>
+-                                            <Radio value={'active'}>{t("enum.memberStatuses.active")}</Radio>
+-                                            <Radio value={'blocked'}>
+-                                                {t("enum.memberStatuses.blocked")}
++                                            <Radio value={'onloan'}>{t("enum.borrowStatuses.onloan")}</Radio>
++                                            <Radio value={'returned'}>
++                                                {t("enum.borrowStatuses.returned")}
+                                             </Radio>
+-                                            <Radio value={'expired'}>
+-                                                {t("enum.memberStatuses.expired")}
++                                            <Radio value={'overdue'}>
++                                                {t("enum.borrowStatuses.overdue")}
+                                             </Radio>
+                                         </Radio.Group>
+                                     </Form.Item>
+diff --git a/apps/frontend/src/pages/borrow/edit.tsx b/apps/frontend/src/pages/borrow/edit.tsx
+index f7f952e..3d54a06 100644
+--- a/apps/frontend/src/pages/borrow/edit.tsx
++++ b/apps/frontend/src/pages/borrow/edit.tsx
+@@ -18,7 +18,7 @@ import {
+ import { IMember } from "../../interfaces";
+ 
+ 
+-export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
++export const BorrowEdit: React.FC<IResourceComponentsProps> = () => {
+     const t = useTranslate();
+     const {
+         formProps,
+@@ -47,8 +47,8 @@ export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
+                             <Row gutter={10}>
+                                 <Col xs={24} lg={16}>
+                                     <Form.Item
+-                                        label={t("members.fields.studentId")}
+-                                        name="studentId"
++                                        label={t("borrows.fields.memberId")}
++                                        name="memberId"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -58,8 +58,8 @@ export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("members.fields.name")}
+-                                        name="name"
++                                        label={t("borrows.fields.bookId")}
++                                        name="bookId"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -69,7 +69,7 @@ export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("members.fields.status")}
++                                        label={t("borrows.fields.status")}
+                                         name="status"
+                                         rules={[
+                                             {
+@@ -78,12 +78,12 @@ export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
+                                         ]}
+                                     >
+                                         <Radio.Group>
+-                                            <Radio value={'active'}>{t("enum.memberStatuses.active")}</Radio>
+-                                            <Radio value={'blocked'}>
+-                                                {t("enum.memberStatuses.blocked")}
++                                            <Radio value={'onloan'}>{t("enum.borrowStatuses.onloan")}</Radio>
++                                            <Radio value={'returned'}>
++                                                {t("enum.borrowStatuses.returned")}
+                                             </Radio>
+-                                            <Radio value={'expired'}>
+-                                                {t("enum.memberStatuses.expired")}
++                                            <Radio value={'overdue'}>
++                                                {t("enum.borrowStatuses.overdue")}
+                                             </Radio>
+                                         </Radio.Group>
+                                     </Form.Item>
+diff --git a/apps/frontend/src/pages/borrow/list.tsx b/apps/frontend/src/pages/borrow/list.tsx
+index 51d1caa..5e1386c 100644
+--- a/apps/frontend/src/pages/borrow/list.tsx
++++ b/apps/frontend/src/pages/borrow/list.tsx
+@@ -1,20 +1,19 @@
+ import {
+-    useTranslate,
++    CloseCircleOutlined,
++    EditOutlined,
++    MoreOutlined,
++} from "@ant-design/icons";
++import { List, useTable } from "@refinedev/antd";
++import {
+     IResourceComponentsProps,
+     useDelete,
+     useNavigation,
++    useTranslate,
+ } from "@refinedev/core";
+-import { List, useTable } from "@refinedev/antd";
+-import {
+-    EditOutlined,
+-    CloseCircleOutlined,
+-    MoreOutlined,
+-} from "@ant-design/icons";
+-import { Table, Avatar, Dropdown, Menu, Space, Typography } from "antd";
++import { Dropdown, Menu, Table } from "antd";
+ 
+-import { IBorrow} from "../../interfaces";
+-import styled from "@emotion/styled";
+-import { BorrowStatus } from "@components/borrowStatus";
++import { IBorrow } from "../../interfaces";
++import { BorrowStatus } from "../../components/borrowStatus";
+ 
+ 
+ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
+diff --git a/apps/frontend/src/pages/members/create.tsx b/apps/frontend/src/pages/members/create.tsx
+index 285d82d..b66a13d 100644
+--- a/apps/frontend/src/pages/members/create.tsx
++++ b/apps/frontend/src/pages/members/create.tsx
+@@ -16,15 +16,15 @@ import {
+     Row
+ } from "antd";
+ 
+-import { IBorrow } from "../../interfaces";
++import { IMember } from "../../interfaces";
+ 
+-export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
++export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
+     const t = useTranslate();
+     const {
+         formProps,
+         saveButtonProps,
+         queryResult,
+-    } = useForm<IBorrow>();
++    } = useForm<IMember>();
+     const apiUrl = useApiUrl('books');
+ 
+     return (
+@@ -46,8 +46,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+                             <Row gutter={10}>
+                                 <Col xs={24} lg={16}>
+                                     <Form.Item
+-                                        label={t("borrows.fields.memberId")}
+-                                        name="memberId"
++                                        label={t("members.fields.studentId")}
++                                        name="studentId"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -57,8 +57,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("borrows.fields.bookId")}
+-                                        name="bookId"
++                                        label={t("members.fields.name")}
++                                        name="name"
+                                         rules={[
+                                             {
+                                                 required: true,
+@@ -68,7 +68,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+                                         <Input />
+                                     </Form.Item>
+                                     <Form.Item
+-                                        label={t("borrows.fields.status")}
++                                        label={t("members.fields.status")}
+                                         name="status"
+                                         rules={[
+                                             {
+@@ -77,12 +77,12 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
+                                         ]}
+                                     >
+                                         <Radio.Group>
+-                                            <Radio value={'onloan'}>{t("enum.borrowStatuses.onloan")}</Radio>
+-                                            <Radio value={'returned'}>
+-                                                {t("enum.borrowStatuses.returned")}
++                                            <Radio value={'active'}>{t("enum.memberStatuses.active")}</Radio>
++                                            <Radio value={'blocked'}>
++                                                {t("enum.memberStatuses.blocked")}
+                                             </Radio>
+-                                            <Radio value={'overdue'}>
+-                                                {t("enum.borrowStatuses.overdue")}
++                                            <Radio value={'expired'}>
++                                                {t("enum.memberStatuses.expired")}
+                                             </Radio>
+                                         </Radio.Group>
+                                     </Form.Item>
+diff --git a/apps/frontend/src/pages/members/list.tsx b/apps/frontend/src/pages/members/list.tsx
+index 035162a..932137d 100644
+--- a/apps/frontend/src/pages/members/list.tsx
++++ b/apps/frontend/src/pages/members/list.tsx
+@@ -12,7 +12,7 @@ import {
+ } from "@ant-design/icons";
+ import { Table, Avatar, Dropdown, Menu, Space, Typography } from "antd";
+ 
+-import { ICourier } from "../../interfaces";
++import { IMember } from "../../interfaces";
+ import { MemberStatus } from "../../components";
+ import styled from "@emotion/styled";
+ 
+@@ -45,7 +45,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
+     const { show, edit } = useNavigation();
+     const t = useTranslate();
+ 
+-    const { tableProps } = useTable<ICourier>({
++    const { tableProps } = useTable<IMember>({
+         initialSorter: [
+             {
+                 field: "id",
+@@ -68,7 +68,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
+ 
+     const { mutate: mutateDelete } = useDelete();
+ 
+-    const moreMenu = (id: number) => (
++    const moreMenu = (id: string) => (
+         <Menu
+             mode="vertical"
+             onClick={({ domEvent }) => domEvent.stopPropagation()}
+@@ -163,7 +163,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
+                         return <MemberStatus status={value} />;
+                     }}
+                 />
+-                <Table.Column<ICourier>
++                <Table.Column<IMember>
+                     fixed="right"
+                     title={t("table.actions")}
+                     dataIndex="actions"

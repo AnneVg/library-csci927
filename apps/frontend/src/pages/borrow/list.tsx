@@ -1,20 +1,19 @@
 import {
-    useTranslate,
+    CloseCircleOutlined,
+    EditOutlined,
+    MoreOutlined,
+} from "@ant-design/icons";
+import { List, useTable } from "@refinedev/antd";
+import {
     IResourceComponentsProps,
     useDelete,
     useNavigation,
+    useTranslate,
 } from "@refinedev/core";
-import { List, useTable } from "@refinedev/antd";
-import {
-    EditOutlined,
-    CloseCircleOutlined,
-    MoreOutlined,
-} from "@ant-design/icons";
-import { Table, Avatar, Dropdown, Menu, Space, Typography } from "antd";
+import { Dropdown, Menu, Table } from "antd";
 
-import { IBorrow} from "../../interfaces";
-import styled from "@emotion/styled";
-import { BorrowStatus } from "@components/borrowStatus";
+import { IBorrow } from "../../interfaces";
+import { BorrowStatus } from "../../components/borrowStatus";
 
 
 export const BorrowList: React.FC<IResourceComponentsProps> = () => {

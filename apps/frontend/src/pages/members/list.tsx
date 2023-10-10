@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 import { Table, Avatar, Dropdown, Menu, Space, Typography } from "antd";
 
-import { ICourier } from "../../interfaces";
+import { IMember } from "../../interfaces";
 import { MemberStatus } from "../../components";
 import styled from "@emotion/styled";
 
@@ -45,7 +45,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
     const { show, edit } = useNavigation();
     const t = useTranslate();
 
-    const { tableProps } = useTable<ICourier>({
+    const { tableProps } = useTable<IMember>({
         initialSorter: [
             {
                 field: "id",
@@ -68,7 +68,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
 
     const { mutate: mutateDelete } = useDelete();
 
-    const moreMenu = (id: number) => (
+    const moreMenu = (id: string) => (
         <Menu
             mode="vertical"
             onClick={({ domEvent }) => domEvent.stopPropagation()}
@@ -163,7 +163,7 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                         return <MemberStatus status={value} />;
                     }}
                 />
-                <Table.Column<ICourier>
+                <Table.Column<IMember>
                     fixed="right"
                     title={t("table.actions")}
                     dataIndex="actions"

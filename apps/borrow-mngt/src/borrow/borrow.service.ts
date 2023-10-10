@@ -8,19 +8,19 @@ export class BorrowService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  // async getAllBorrows() {
-  //   const borrows = await this.prisma.borrow.findMany({});
-  //   return borrows;
-  // }
+  async getAllBorrows() {
+    const borrows = await this.prisma.borrowingBook.findMany({});
+    return borrows;
+  }
 
-  // async getMemberById(id: string) {
-  //   const borrow = this.prisma.borrow.findUnique({
-  //     where: {
-  //       id: id,
-  //     },
-  //   });
-  //   return borrow;
-  // }
+  async getBorrowById(id: string) {
+    const borrow = this.prisma.borrowingBook.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return borrow;
+  }
 
   async addBorrow(createBorrowInput: CreateBorrowInput) {
     const dataToInsert = {
