@@ -171,15 +171,15 @@ export interface IMember {
 }
 export interface IBorrow {
     id: string;
-    studentId: string;
-    isbn: string;
-    // duedate: Date;
-    // status:  
-    //     | "onloan"
-    //     | "returned"
-    //     | "overdue";
-    // createdAt: Date;
-    // updatedAt: Date;
+    book: IBook,
+    member: IMember,
+    duedate: Date;
+    status:  
+        | "onloan"
+        | "returned"
+        | "overdue";
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IBookCategory {

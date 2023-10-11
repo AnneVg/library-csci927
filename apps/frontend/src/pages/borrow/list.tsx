@@ -2,6 +2,7 @@ import {
     CloseCircleOutlined,
     EditOutlined,
     MoreOutlined,
+    RollbackOutlined,
 } from "@ant-design/icons";
 import { List, useTable } from "@refinedev/antd";
 import {
@@ -9,6 +10,7 @@ import {
     useDelete,
     useNavigation,
     useTranslate,
+    useUpdate,
 } from "@refinedev/core";
 import { Dropdown, Menu, Table } from "antd";
 
@@ -21,15 +23,15 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
 
     const { tableProps } = useTable<IBorrow>({
-        initialSorter: [
-            {
-                field: "id",
-                order: "desc",
-            },
-        ],
+        // initialSorter: [
+        //     {
+        //         field: "id",
+        //         order: "desc",
+        //     },
+        // ],
     });
 
-    const { mutate: mutateDelete } = useDelete();
+    const { mutate: mutateUpdate } = useUpdate();
 
     const moreMenu = (id: string) => (
         <Menu
@@ -60,7 +62,7 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
                 {t("buttons.edit")}
             </Menu.Item>
             <Menu.Item
-                key="delete"
+                key="return"
                 style={{
                     fontSize: 15,
                     display: "flex",
@@ -68,22 +70,25 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
                     fontWeight: 500,
                 }}
                 icon={
-                    <CloseCircleOutlined
+                    <RollbackOutlined
                         style={{
-                            color: "#EE2A1E",
+                            color: "#508fee",
                             fontSize: 17,
                         }}
                     />
                 }
                 onClick={() => {
-                    mutateDelete({
+                    mutateUpdate({
                         resource: "borrows",
+                        values: {
+                            status: 'returned',
+                        },
                         id,
                         mutationMode: "optimistic",
                     });
                 }}
             >
-                {t("buttons.delete")}
+                {t("buttons.return")}
             </Menu.Item>
         </Menu>
     );
@@ -102,11 +107,11 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
                 }}
             >
                 <Table.Column
-                    dataIndex="memberId"
-                    title={t("borrows.fields.memberId")}
+                    dataIndex={["member", "name"]}
+                    title={t("borrows.fields.studentId")}
                 />
                 <Table.Column
-                    dataIndex="bookId"
+                    dataIndex={["book", "title"]}
                     title={t("borrows.fields.bookId")}
                 />
                 <Table.Column

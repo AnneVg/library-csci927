@@ -234,43 +234,6 @@ export const Header: React.FC = () => {
                                 setMode(mode === "light" ? "dark" : "light");
                             }}
                         />
-                        <Dropdown
-                            menu={{
-                                items: menuItems,
-                                selectedKeys: currentLocale
-                                    ? [currentLocale]
-                                    : [],
-                            }}
-                        >
-                            <a
-                                style={{ color: "inherit" }}
-                                onClick={(e) => e.preventDefault()}
-                            >
-                                <Space>
-                                    <Avatar
-                                        size={16}
-                                        src={`/images/flags/${currentLocale}.svg`}
-                                    />
-                                    <div
-                                        style={{
-                                            display: screens.lg
-                                                ? "block"
-                                                : "none",
-                                        }}
-                                    >
-                                        {currentLocale === "en"
-                                            ? "English"
-                                            : "German"}
-                                        <DownOutlined
-                                            style={{
-                                                fontSize: "12px",
-                                                marginLeft: "6px",
-                                            }}
-                                        />
-                                    </div>
-                                </Space>
-                            </a>
-                        </Dropdown>
 
                         <Text
                             ellipsis

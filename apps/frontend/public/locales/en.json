@@ -93,7 +93,8 @@
         "reject": "Reject",
         "rejectAll": "Reject All",
         "nextStep": "Next",
-        "previousStep": "Previous"
+        "previousStep": "Previous",
+        "return": "Return"
     },
     "loading": "Loading",
     "tags": {
@@ -478,9 +479,10 @@
             "id": "ID",
             "name": "Name",
             "memberId": "Member Id",
+            "studentId": "Student Id",
             "bookId": "Book Id",
             "status": "Status",
-            "duedate": "Status",
+            "duedate": "Due date",
             "createdAt": "CreatedAt",
             "isActive": "Is Active",
             "images": {

@@ -10,6 +10,7 @@ import {
 } from "@refinedev/core";
 import {
     Col,
+    DatePicker,
     Form,
     Input,
     Radio,
@@ -17,6 +18,7 @@ import {
 } from "antd";
 
 import { IBorrow } from "../../interfaces";
+import dayjs from "dayjs";
 
 export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
@@ -38,7 +40,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                     style={{ marginTop: 30 }}
                     layout="vertical"
                     initialValues={{
-                        status: 'active',
+                        status: 'onloan',
                     }}
                 >
                     <Row gutter={20}>
@@ -68,6 +70,15 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
+                                        label={t("borrows.field.duedate")}
+                                        name="dueDate"
+                                        getValueProps={(value) => ({
+                                            value: value ? dayjs(value) : "",
+                                        })}
+                                    >
+                                        <DatePicker />
+                                    </Form.Item>
+                                    <Form.Item
                                         label={t("borrows.fields.status")}
                                         name="status"
                                         rules={[
@@ -77,9 +88,10 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         ]}
                                     >
                                         <Radio.Group>
-                                            <Radio value={'onloan'} defaultChecked={true} checked={true}>{t("enum.borrowStatuses.onloan") } </Radio>
+                                            <Radio disabled={true} value={'onloan'} >{t("enum.borrowStatuses.onloan")} </Radio>
                                         </Radio.Group>
                                     </Form.Item>
+
                                 </Col>
                             </Row>
                         </Col>

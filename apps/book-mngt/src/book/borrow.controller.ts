@@ -12,7 +12,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { map } from 'rxjs/operators';
 import { ICreateBorrowInput } from '../interfaces/borrow';
   
-  @Controller('members')
+  @Controller('borrows')
   export class BorrowController implements OnApplicationBootstrap {
     private logger: Logger = new Logger(this.constructor.name);
     constructor(
@@ -50,7 +50,7 @@ import { ICreateBorrowInput } from '../interfaces/borrow';
     @Post()
     async createBorrow(@Body() borrowInput: ICreateBorrowInput) {
       try {
-        const pattern = { cmd: 'create_member' };
+        const pattern = { cmd: 'create_borrow' };
         return await this.borrowClientApp
           .send(pattern, borrowInput)
           .pipe(map((message) => message));

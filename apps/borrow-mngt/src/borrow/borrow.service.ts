@@ -1,6 +1,7 @@
 import { Injectable, Logger, Patch } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBorrowInput } from './create-borrow.input.model';
+import { UpdateBorrowInput } from './update-borrow.input.model';
 
 @Injectable()
 export class BorrowService {
@@ -9,12 +10,21 @@ export class BorrowService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllBorrows() {
-    const borrows = await this.prisma.borrowingBook.findMany({});
+    const borrows = await this.prisma.borrowingBook.findMany({
+      include: {
+        book: true,
+        member: true,
+      }
+    });
     return borrows;
   }
 
   async getBorrowById(id: string) {
     const borrow = this.prisma.borrowingBook.findUnique({
+      include: {
+        book: true,
+        member: true
+      },
       where: {
         id: id,
       },
@@ -49,25 +59,34 @@ export class BorrowService {
     return borrow;
   }
 
-  // async updateMember(id: string, updateMemberInput: UpdateMemberInput) {
-  //   const member = await this.prisma.member.update({
-  //     where: {
-  //       id: id,
-  //     },
-  //     data: {
-  //       ...updateMemberInput,
-  //       updatedAt: new Date(),
-  //     },
-  //   });
-  //   return member;
-  // }
+  async updateBorrow(borrowId: number, updateBorrowInput: UpdateBorrowInput) {
+    const borrow = await this.prisma.borrowingBook.findUnique({
+      where: {
+        id: updateBorrowInput.id
+      }
+    });
 
-  // async deleteMember(id: string) {
-  //   const count = await this.prisma.member.deleteMany({
-  //     where: {
-  //       id: id,
-  //     },
-  //   });
-  //   return count;
-  // }
+    if (!borrow) throw Error('Invalid borrow');
+  
+    const updatedBorrow = await this.prisma.borrowingBook.update({
+      where: {
+        id: borrow.id
+      },
+      data: {
+        ...updateBorrowInput,
+        updatedAt: new Date()
+      }
+    });
+  
+    return updatedBorrow;
+  }
+
+  async deleteBorrow(borrowId: string) {
+    return await this.prisma.borrowingBook.deleteMany({
+      where: {
+        id: borrowId
+      }
+    });
+  
+  }
 }
