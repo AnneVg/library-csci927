@@ -6,11 +6,12 @@ import {
     Logger,
     OnApplicationBootstrap,
     Param,
+    Patch,
     Post
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { map } from 'rxjs/operators';
-import { ICreateBorrowInput } from '../interfaces/borrow';
+import { ICreateBorrowInput, IUpdateBorrowInput } from '../interfaces/borrow';
   
   @Controller('borrows')
   export class BorrowController implements OnApplicationBootstrap {
@@ -51,6 +52,19 @@ import { ICreateBorrowInput } from '../interfaces/borrow';
     async createBorrow(@Body() borrowInput: ICreateBorrowInput) {
       try {
         const pattern = { cmd: 'create_borrow' };
+        return await this.borrowClientApp
+          .send(pattern, borrowInput)
+          .pipe(map((message) => message));
+      } catch (err) {
+        this.logger.error(err);
+      }
+    }
+
+    @Patch(':id')
+    async updateBorrow(@Param('id') id: string, @Body() borrowInput: IUpdateBorrowInput) {
+      try {
+        borrowInput.id = id;
+        const pattern = { cmd: 'update_borrow' };
         return await this.borrowClientApp
           .send(pattern, borrowInput)
           .pipe(map((message) => message));

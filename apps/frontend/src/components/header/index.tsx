@@ -201,24 +201,7 @@ export const Header: React.FC = () => {
                 }}
             >
                 <Col xs={0} sm={12}>
-                    <AutoComplete
-                        style={{
-                            width: "100%",
-                            maxWidth: "550px",
-                        }}
-                        options={options}
-                        filterOption={false}
-                        onSearch={debounce(
-                            (value: string) => setValue(value),
-                            300,
-                        )}
-                    >
-                        <Input
-                            size="large"
-                            placeholder={t("search.placeholder")}
-                            suffix={<SearchOutlined />}
-                        />
-                    </AutoComplete>
+                    
                 </Col>
                 <Col>
                     <Space size="middle" align="center">

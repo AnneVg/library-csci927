@@ -3,8 +3,9 @@ import {
     EditOutlined,
     MoreOutlined,
     RollbackOutlined,
+    SnippetsOutlined,
 } from "@ant-design/icons";
-import { List, useTable } from "@refinedev/antd";
+import { List, useTable, DateField } from "@refinedev/antd";
 import {
     IResourceComponentsProps,
     useDelete,
@@ -38,29 +39,7 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
             mode="vertical"
             onClick={({ domEvent }) => domEvent.stopPropagation()}
         >
-            <Menu.Item
-                key="edit"
-                style={{
-                    fontSize: 15,
-                    display: "flex",
-                    alignItems: "center",
-                    fontWeight: 500,
-                }}
-                icon={
-                    <EditOutlined
-                        style={{
-                            color: "#52c41a",
-                            fontSize: 17,
-                            fontWeight: 500,
-                        }}
-                    />
-                }
-                onClick={() => {
-                    edit("borrows", id);
-                }}
-            >
-                {t("buttons.edit")}
-            </Menu.Item>
+
             <Menu.Item
                 key="return"
                 style={{
@@ -90,6 +69,36 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
             >
                 {t("buttons.return")}
             </Menu.Item>
+
+            <Menu.Item
+                key="archive"
+                style={{
+                    fontSize: 15,
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight: 500,
+                }}
+                icon={
+                    <SnippetsOutlined 
+                        style={{
+                            color: "#ef982d",
+                            fontSize: 17,
+                        }}
+                    />
+                }
+                onClick={() => {
+                    mutateUpdate({
+                        resource: "borrows",
+                        values: {
+                            status: 'archived',
+                        },
+                        id,
+                        mutationMode: "optimistic",
+                    });
+                }}
+            >
+                {t("buttons.archive")}
+            </Menu.Item>
         </Menu>
     );
 
@@ -108,18 +117,24 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
             >
                 <Table.Column
                     dataIndex={["member", "name"]}
-                    title={t("borrows.fields.studentId")}
+                    title={t("borrows.fields.studentName")}
                 />
                 <Table.Column
                     dataIndex={["book", "title"]}
-                    title={t("borrows.fields.bookId")}
+                    title={t("borrows.fields.bookTitle")}
                 />
                 <Table.Column
                     dataIndex="status"
-                    title={t("members.fields.status")}
+                    title={t("borrows.fields.status")}
                     render={(value) => {
                         return <BorrowStatus status={value} />;
                     }}
+                />
+                <Table.Column
+                    dataIndex="duedate"
+                    title={t("borrows.fields.duedate")}
+                    render={(value) => <DateField value={value} format="LLL" />}
+
                 />
                 <Table.Column<IBorrow>
                     fixed="right"

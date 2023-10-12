@@ -59,10 +59,10 @@ export class BorrowService {
     return borrow;
   }
 
-  async updateBorrow(borrowId: number, updateBorrowInput: UpdateBorrowInput) {
+  async updateBorrow(borrowId: string, updateBorrowInput: UpdateBorrowInput) {
     const borrow = await this.prisma.borrowingBook.findUnique({
       where: {
-        id: updateBorrowInput.id
+        id: borrowId
       }
     });
 

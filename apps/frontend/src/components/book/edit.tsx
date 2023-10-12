@@ -59,6 +59,18 @@ export const EditBook: React.FC<EditBookProps> = ({
                 }}
             >
                 <Form {...formProps} layout="vertical">
+                <Form.Item
+                        label={t("books.fields.category")}
+                        name="categoryId"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Select {...categorySelectProps} />
+                    </Form.Item>
+
                     <Form.Item
                         label={t("books.fields.title")}
                         name="title"
@@ -108,18 +120,6 @@ export const EditBook: React.FC<EditBookProps> = ({
                     </Form.Item>
 
                     <Form.Item
-                        label={t("books.fields.description")}
-                        name="shortDescription"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input.TextArea rows={6} />
-                    </Form.Item>
-
-                    <Form.Item
                         label={t("books.fields.stock")}
                         name="stock"
                         rules={[
@@ -133,28 +133,19 @@ export const EditBook: React.FC<EditBookProps> = ({
                             style={{ width: "150px" }}
                         />
                     </Form.Item>
+
                     <Form.Item
-                        label={t("books.fields.category")}
-                        name="categoryId"
+                        label={t("books.fields.description")}
+                        name="shortDescription"
                         rules={[
                             {
                                 required: true,
                             },
                         ]}
                     >
-                        <Select {...categorySelectProps} />
+                        <Input.TextArea rows={6} />
                     </Form.Item>
-                    <Form.Item
-                        label={t("books.fields.author")}
-                        name="author"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input />
-                    </Form.Item>
+
                     <Form.Item
                         label={t("books.fields.status")}
                         name="status"

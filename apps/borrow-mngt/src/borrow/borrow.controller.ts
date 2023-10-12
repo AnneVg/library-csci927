@@ -29,17 +29,17 @@ export class BorrowController {
     }
   }
 
-  // @MessagePattern({ cmd: 'update_borrow' })
-  // async updateBorrow(borrowInput: UpdateBorrowInput) {
-  //   try {
-  //     const { id } = borrowInput;
-  //     if (!id) throw Error('Invalid arguments');
-  //     const borrow = await this.borrowService.updateMember(id, borrowInput);
-  //     return borrow;
-  //   } catch (err) {
-  //     this.logger.error(err);
-  //   }
-  // }
+  @MessagePattern({ cmd: 'update_borrow' })
+  async updateBorrow(borrowInput: UpdateBorrowInput) {
+    try {
+      const { id } = borrowInput;
+      if (!id) throw Error('Invalid arguments');
+      const borrow = await this.borrowService.updateBorrow(id, borrowInput);
+      return borrow;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
 
   // @MessagePattern({ cmd: 'delete_borrow' })
   // async deleteMember(id: string) {

@@ -25,13 +25,14 @@ export const Title: React.FC<TitleProps> = ({ collapsed }) => {
                         }}
                     />
                 ) : (
-                    <UowLibraryIcon
-                        style={{
-                            color: token.colorTextHeading,
-                            width: "100%",
-                            height: "auto",
-                        }}
-                    />
+                    <Link to="/">
+                        <img
+                            style={{ marginBottom: 2 }}
+                            src="/images/uow-login-logo.png"
+                            alt="Logo"
+                            width="100%"
+                        />
+                    </Link>
                 )}
             </Link>
         </Logo>

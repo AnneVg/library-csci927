@@ -177,7 +177,8 @@ export interface IBorrow {
     status:  
         | "onloan"
         | "returned"
-        | "overdue";
+        | "overdue"
+        | "archived";
     createdAt: Date;
     updatedAt: Date;
 }

@@ -102,7 +102,7 @@ export const BookItem: React.FC<BookItemProps> = ({
                 <div style={{ textAlign: "center" }}>
                     <Image
                         width={128}
-                        src={`/images/default_book_cover.jpg`}
+                        src={`/images/default_book_cover.png`}
                         alt={item.title}
                     />
                 </div>

@@ -94,7 +94,8 @@
         "rejectAll": "Reject All",
         "nextStep": "Next",
         "previousStep": "Previous",
-        "return": "Return"
+        "return": "Return",
+        "archive": "Archive"
     },
     "loading": "Loading",
     "tags": {
@@ -232,7 +233,8 @@
         "borrowStatuses": {
             "onloan": "On loan",
             "overdue": "Over due",
-            "returned": "Returned"
+            "returned": "Returned",
+            "archived": "Archived"
         }
     },
     "orders": {
@@ -480,6 +482,8 @@
             "name": "Name",
             "memberId": "Member Id",
             "studentId": "Student Id",
+            "studentName":"Student Name",
+            "bookTitle":"Book Title",
             "bookId": "Book Id",
             "status": "Status",
             "duedate": "Due date",

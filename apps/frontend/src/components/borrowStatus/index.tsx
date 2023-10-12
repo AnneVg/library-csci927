@@ -2,7 +2,7 @@ import { useTranslate } from "@refinedev/core";
 import { Tag } from "antd";
 
 type BorrowStatusProps = {
-    status: "onloan" | "returned" | "overdue";
+    status: "onloan" | "returned" | "overdue" | "archived";
 };
 
 export const BorrowStatus: React.FC<BorrowStatusProps> = ({ status }) => {
@@ -18,6 +18,9 @@ export const BorrowStatus: React.FC<BorrowStatusProps> = ({ status }) => {
             break;
         case "returned":
             color = "blue";
+            break;
+        case "archived":
+            color = "orange";
             break;
     }
 
