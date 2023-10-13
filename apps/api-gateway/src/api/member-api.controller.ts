@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 import { ICreateMemberInput, IUpdateMemberInput } from '../interfaces/member';
 
 @Controller('members')
-export class MemberController implements OnApplicationBootstrap {
+export class MemberApiController implements OnApplicationBootstrap {
   private logger: Logger = new Logger(this.constructor.name);
   constructor(
     @Inject('MEMBERS_SERVICE') private memberClientApp: ClientProxy,

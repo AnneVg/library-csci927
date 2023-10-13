@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { ApiParam } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
 import { CreateBookInput } from './create-book.input.model';
@@ -19,23 +20,22 @@ export class CategoryController {
   private logger: Logger = new Logger(this.constructor.name);
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Get(':id')
-  async getCategory(@Param('id') id: string) {
+  @MessagePattern({ cmd: 'get_category' })
+  async getCategory(id: string) {
     return await this.categoryService.getCategoryById(id);
   }
 
-  @Get()
+  @MessagePattern({ cmd: 'get_categories' })
   async getCategories() {
     return await this.categoryService.getAllCategories();
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the book' })
+  @MessagePattern({ cmd: 'update_category' })
   async updateCategory(
-    @Param('id') id: string,
-    @Body() input: { name: string },
+    input: { id: string; name: string },
   ) {
     try {
+      const { id } = input;
       if (!id) throw Error('Invalid arguments');
       const { name } = input;
       const category = await this.categoryService.updateCategory(id, name);

@@ -1,3 +1,4 @@
+// define functions of service
 import { Injectable, Logger, Patch } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookInput } from './create-book.input.model';
@@ -12,7 +13,7 @@ export class BookService {
 
   async getAllBooks(limit: number, offset: number, categoryIds: string[], query?: string) {
     const whereCondition: Prisma.BookWhereInput = query ? {
-      
+
       OR: [
         {
           title: {
@@ -53,6 +54,15 @@ export class BookService {
     return book;
   }
 
+  async getBookByIsbn(isbn: string) {
+    const book = this.prisma.book.findFirst({
+      where: {
+        isbn: isbn,
+      },
+    });
+    return book;
+  }
+
   async addBook(createBookInput: CreateBookInput) {
     const dataToInsert = {
       data: {
@@ -82,5 +92,16 @@ export class BookService {
         id: id,
       },
     });
+  }
+
+  async checkAvailableBook(id: string) {
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (book.stock > 0 && book.status == "available")
+      return true;
+    return false;
   }
 }

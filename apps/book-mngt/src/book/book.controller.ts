@@ -1,3 +1,4 @@
+// receive service call
 import {
   Body,
   Controller,
@@ -11,34 +12,46 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
+import { MessagePattern } from '@nestjs/microservices';
 import { BookService } from './book.service';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
 
-@Controller('books')
+@Controller()
 export class BookController {
   private logger: Logger = new Logger(this.constructor.name);
-  constructor(private readonly bookService: BookService) {}
+  constructor(private readonly bookService: BookService) { }
 
-  @Get(':id')
-  async getBook(@Param('id') id: string) {
+  @MessagePattern({ cmd: 'get_book' })
+  async getBook(id: string) {
     return await this.bookService.getBookById(id);
   }
 
-  @Get()
-  async getBooks(
-    @Query('_start') _start: number,
-    @Query('_end') _end: number,
-    @Query('name_like') query: string,
-    @Query('categoryId') categoryIds: string[]
-  ) {
+  @MessagePattern({ cmd: 'get_book_by_isbn' })
+  async getBookByIsbn(isbn: string) {
+    return await this.bookService.getBookByIsbn(isbn);
+  }
+
+  @MessagePattern({ cmd: 'check_book_available' })
+  async checkBookAvailable(id: string) {
+    return await this.bookService.checkAvailableBook(id);
+  }
+
+  @MessagePattern({ cmd: 'get_books' })
+  async getBooks(params: {
+    _start: number;
+    _end: number;
+    query: string;
+    categoryIds: string[];
+  }) {
+    const { _start, _end, query, categoryIds } = params;
     const limit = _end - _start;
     const offset = _start;
     return await this.bookService.getAllBooks(limit, offset, categoryIds, query);
   }
 
-  @Post()
-  async createBook(@Body() bookInput: CreateBookInput) {
+  @MessagePattern({ cmd: 'create_book' })
+  async createBook(bookInput: CreateBookInput) {
     try {
       const book = await this.bookService.addBook(bookInput);
       return book;
@@ -47,13 +60,12 @@ export class BookController {
     }
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the book' })
+  @MessagePattern({ cmd: 'update_book' })
   async updateBook(
-    @Param('id') id: string,
-    @Body() bookInput: UpdateBookInput,
+    bookInput: UpdateBookInput,
   ) {
     try {
+      const { id } = bookInput;
       if (!id) throw Error('Invalid arguments');
       const book = await this.bookService.updateBook(id, bookInput);
       return book;
@@ -62,9 +74,8 @@ export class BookController {
     }
   }
 
-  @Delete(':id')
-  @HttpCode(204)
-  async deleteBook(@Param('id') id: string) {
+  @MessagePattern({ cmd: 'delete_book' })
+  async deleteBook(id: string) {
     try {
       await this.bookService.deleteBook(id);
     } catch (err) {
