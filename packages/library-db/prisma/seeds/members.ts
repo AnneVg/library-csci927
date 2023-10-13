@@ -5,6 +5,7 @@ export const members = [
       "name": "John Smith",
       "studentId": "1234567890",
       "status": "active",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -13,6 +14,7 @@ export const members = [
       "name": "Emily Johnson",
       "studentId": "9876543210",
       "status": "blocked",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -21,6 +23,7 @@ export const members = [
       "name": "Michael Davis",
       "studentId": "4567890123",
       "status": "active",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -29,6 +32,7 @@ export const members = [
       "name": "Sarah Brown",
       "studentId": "2345678901",
       "status": "expired",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -37,6 +41,7 @@ export const members = [
       "name": "David Wilson",
       "studentId": "8765432109",
       "status": "active",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -45,6 +50,7 @@ export const members = [
       "name": "Jennifer Lee",
       "studentId": "3456789012",
       "status": "blocked",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -53,6 +59,7 @@ export const members = [
       "name": "Christopher White",
       "studentId": "6543210987",
       "status": "active",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -61,6 +68,7 @@ export const members = [
       "name": "Jessica Hall",
       "studentId": "7890123456",
       "status": "active",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },
@@ -69,6 +77,7 @@ export const members = [
       "name": "Matthew Turner",
       "studentId": "5678901234",
       "status": "expired",
+      "dayOfBirth": "2000-01-01",
       "createdAt": "2023-10-07T12:00:00Z",
       "updatedAt": "2023-10-07T12:00:00Z"
     },

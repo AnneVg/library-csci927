@@ -12,10 +12,12 @@ import {
     Form,
     Input,
     Row,
-    Radio
+    Radio,
+    DatePicker
 } from "antd";
 
 import { IMember } from "../../interfaces";
+import dayjs from "dayjs";
 
 
 export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
@@ -67,6 +69,15 @@ export const MemberEdit: React.FC<IResourceComponentsProps> = () => {
                                         ]}
                                     >
                                         <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label={t("members.fields.dayOfBirth")}
+                                        name="dayOfBirth"
+                                        getValueProps={(value) => ({
+                                            value: value ? dayjs(value) : "",
+                                        })}
+                                    >
+                                        <DatePicker />
                                     </Form.Item>
                                     <Form.Item
                                         label={t("members.fields.status")}

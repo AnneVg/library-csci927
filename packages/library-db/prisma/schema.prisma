@@ -12,6 +12,7 @@ model Member {
   name          String
   studentId     String          @map("student_id")
   status        String          @map("status")
+  dayOfBirth    DateTime?       @map("day_of_birth") @db.Timestamptz
   borrowingBook BorrowingBook[]
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime        @default(now()) @map("updated_at") @db.Timestamptz

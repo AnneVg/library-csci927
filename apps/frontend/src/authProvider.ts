@@ -8,7 +8,7 @@ export const authProvider: AuthBindings = {
         localStorage.setItem(TOKEN_KEY, `${email}-${password}`);
         return {
             success: true,
-            redirectTo: "/",
+            redirectTo: "/books",
         };
     },
     register: async ({ email, password }) => {

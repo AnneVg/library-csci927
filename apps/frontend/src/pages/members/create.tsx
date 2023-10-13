@@ -10,6 +10,7 @@ import {
 } from "@refinedev/core";
 import {
     Col,
+    DatePicker,
     Form,
     Input,
     Radio,
@@ -17,6 +18,7 @@ import {
 } from "antd";
 
 import { IMember } from "../../interfaces";
+import dayjs from "dayjs";
 
 export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
@@ -66,6 +68,15 @@ export const MemberCreate: React.FC<IResourceComponentsProps> = () => {
                                         ]}
                                     >
                                         <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label={t("members.fields.dayOfBirth")}
+                                        name="dayOfBirth"
+                                        getValueProps={(value) => ({
+                                            value: value ? dayjs(value) : "",
+                                        })}
+                                    >
+                                        <DatePicker />
                                     </Form.Item>
                                     <Form.Item
                                         label={t("members.fields.status")}

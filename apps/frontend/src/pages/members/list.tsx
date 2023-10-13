@@ -4,7 +4,7 @@ import {
     useDelete,
     useNavigation,
 } from "@refinedev/core";
-import { List, useTable } from "@refinedev/antd";
+import { DateField, List, useTable } from "@refinedev/antd";
 import {
     EditOutlined,
     CloseCircleOutlined,
@@ -155,6 +155,12 @@ export const MemberList: React.FC<IResourceComponentsProps> = () => {
                 <Table.Column
                     dataIndex="studentId"
                     title={t("members.fields.studentId")}
+                />
+                <Table.Column
+                    dataIndex="dayOfBirth"
+                    title={t("members.fields.dayOfBirth")}
+                    render={(value) => value ? <DateField value={value} format="LL" /> : ''}
+
                 />
                 <Table.Column
                     dataIndex="status"

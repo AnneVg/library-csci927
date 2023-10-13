@@ -428,6 +428,7 @@
             "studentId": "Student Id",
             "status": "Status",
             "email": "E-Mail",
+            "dayOfBirth": "Day of birth",
             "createdAt": "CreatedAt",
             "isActive": "Is Active",
             "images": {

@@ -1,8 +1,9 @@
 export class Member {
   id: string;
-  title: string;
-  student_id: string;
+  name: string;
+  studentId: string;
   status: string;
+  dayOfBirth?: Date;
   createdAt?: Date;
   updatedAt?: Date;
   constructor(partial: Partial<Member>) {

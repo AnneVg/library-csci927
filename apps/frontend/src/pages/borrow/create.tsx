@@ -72,6 +72,11 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                     <Form.Item
                                         label={t("borrows.field.duedate")}
                                         name="dueDate"
+                                        rules={[
+                                            {
+                                                required: true,
+                                            },
+                                        ]}
                                         getValueProps={(value) => ({
                                             value: value ? dayjs(value) : "",
                                         })}
