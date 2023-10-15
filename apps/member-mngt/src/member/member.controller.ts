@@ -14,6 +14,11 @@ export class MemberController {
     return await this.memberService.getMemberById(id);
   }
 
+  @MessagePattern({ cmd: 'get_member_by_student_id' })
+  async getMemberByStudentId(studentId: string) {
+    return  await this.memberService.getMemberByStudentId(studentId);
+  }
+
   @MessagePattern({ cmd: 'get_members' })
   async getMembers() {
     return await this.memberService.getAllMembers();

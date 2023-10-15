@@ -2,6 +2,7 @@ import { Injectable, Logger, Patch } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBorrowInput } from './create-borrow.input.model';
 import { UpdateBorrowInput } from './update-borrow.input.model';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class BorrowService {
@@ -38,7 +39,9 @@ export class BorrowService {
         studentId: createBorrowInput.studentId
       }
     });
-    if (!student) throw Error('Invalid student');
+
+    if (!student) throw new RpcException('Invalid student');
+    if (student.status !== 'active') throw new RpcException('Student is not active');
 
     const book = await this.prisma.book.findFirst({
       where: {
@@ -47,16 +50,34 @@ export class BorrowService {
     });
     if (!book) throw Error('Invalid book');
 
+    if (book.status != 'available') throw new RpcException('Book is not available');
+
+    if (book.stock < 1) throw new RpcException('Out of stock');
+
     const dataToInsert = {
       data: {
         dueDate: new Date(),
         status: 'onloan',
         bookId: book.id,
-        memberId: student.id
+        memberId: student.id,
       },
     };
-    const borrow = await this.prisma.borrowingBook.create(dataToInsert);
-    return borrow;
+    return await this.prisma.$transaction(async (prisma) => {
+      const borrow = await prisma.borrowingBook.create(dataToInsert);
+      await prisma.book.update({
+        where: {
+          id: book.id,
+        },
+        data: {
+          stock: {
+            decrement: 1
+          },
+          status: book.stock <= 1 ? 'outofstock' : 'available',
+          updatedAt: new Date()
+        }
+      });
+      return borrow;
+    });
   }
 
   async updateBorrow(borrowId: string, updateBorrowInput: UpdateBorrowInput) {
@@ -67,7 +88,13 @@ export class BorrowService {
     });
 
     if (!borrow) throw Error('Invalid borrow');
-  
+
+    const book = await this.prisma.book.findUnique({
+      where: {
+        id: borrow.bookId
+      }
+    });
+
     const updatedBorrow = await this.prisma.borrowingBook.update({
       where: {
         id: borrow.id
@@ -77,6 +104,21 @@ export class BorrowService {
         updatedAt: new Date()
       }
     });
+
+    if (borrow.status === 'onloan' && updateBorrowInput.status === 'returned') {
+      await this.prisma.book.update({
+        where: {
+          id: book.id
+        },
+        data: {
+          stock: {
+            increment: 1
+          },
+          status: 'available',
+          updatedAt: new Date()
+        }
+      });
+    }
   
     return updatedBorrow;
   }

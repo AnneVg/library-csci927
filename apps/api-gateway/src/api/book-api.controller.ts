@@ -5,16 +5,16 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   Logger,
+  OnApplicationBootstrap,
   Param,
   Patch,
   Post,
-  Query,
-  Inject,
-  OnApplicationBootstrap
+  Query
 } from '@nestjs/common';
-import { map } from 'rxjs/operators';
 import { ClientProxy } from '@nestjs/microservices';
+import { map } from 'rxjs/operators';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
 
@@ -69,17 +69,13 @@ export class BookApiController implements OnApplicationBootstrap {
 
   @Post()
   async createBook(@Body() bookInput: CreateBookInput) {
+    const pattern = { cmd: 'create_book' };
     try {
-      const pattern = { cmd: 'create_book' };
-      try {
-        return await this.bookClientApp
-          .send<CreateBookInput>(pattern, bookInput)
-          .pipe(map((message) => message))
-      } catch (err) {
-        this.logger.error(err);
-      }
+      return await this.bookClientApp
+        .send<CreateBookInput>(pattern, bookInput)
+        .pipe(map((message) => message));
     } catch (err) {
-      this.logger.error(err);
+      throw err;
     }
   }
 

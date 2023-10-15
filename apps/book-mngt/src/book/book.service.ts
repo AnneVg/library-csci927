@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
 import { Prisma } from 'database';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class BookService {
@@ -39,14 +40,17 @@ export class BookService {
     const books = await this.prisma.book.findMany({
       take: Number(limit),
       skip: Number(offset),
-      where: whereCondition
+      where: whereCondition,
+      orderBy: {
+        updatedAt: 'desc'
+      }
     });
 
     return books;
   }
 
   async getBookById(id: string) {
-    const book = this.prisma.book.findUnique({
+    const book = await this.prisma.book.findUnique({
       where: {
         id: id,
       },
@@ -55,7 +59,7 @@ export class BookService {
   }
 
   async getBookByIsbn(isbn: string) {
-    const book = this.prisma.book.findFirst({
+    const book = await this.prisma.book.findFirst({
       where: {
         isbn: isbn,
       },
@@ -64,13 +68,21 @@ export class BookService {
   }
 
   async addBook(createBookInput: CreateBookInput) {
+
+    const book = await this.prisma.book.findFirst({
+      where: {
+        isbn: createBookInput.isbn,
+      },
+    });
+    if (book) {
+      throw new RpcException('Book already exists');
+    }
     const dataToInsert = {
       data: {
         ...createBookInput,
       },
     };
-    const book = await this.prisma.book.create(dataToInsert);
-    return book;
+    return await this.prisma.book.create(dataToInsert);
   }
 
   async updateBook(id: string, updateBookInput: UpdateBookInput) {
@@ -100,6 +112,7 @@ export class BookService {
         id: id,
       },
     });
+    console.log('book', book);
     if (book.stock > 0 && book.status == "available")
       return true;
     return false;

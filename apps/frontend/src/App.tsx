@@ -29,28 +29,19 @@ import { ConfigProvider } from "./context";
 import { AuthPage } from "./pages/auth";
 import { CategoryList } from "./pages/categories";
 import {
-    CourierCreate,
-    CourierEdit,
-    CourierList,
-    CourierShow,
-} from "./pages/couriers";
-import {
     MemberCreate,
     MemberEdit,
     MemberList,
 } from "./pages/members";
-import { ReviewsList } from "./pages/reviews";
 
 import "@refinedev/antd/dist/reset.css";
 import { BookList } from "./pages/books";
 import { BorrowCreate, BorrowList } from "./pages/borrow";
 
 const App: React.FC = () => {
-    const API_URL = "https://api.finefoods.refine.dev";
 
     const libraryApiUrl = process.env.LIBRARY_API_URL || 'http://localhost:4200/api';
     
-    const dataProvider = jsonServerDataProvider(API_URL);
     const bookProvider = jsonServerDataProvider(libraryApiUrl);
 
     const { t, i18n } = useTranslation();
@@ -68,7 +59,7 @@ const App: React.FC = () => {
                     <Refine
                         routerProvider={routerProvider}
                         dataProvider={{
-                            default: dataProvider,
+                            default: bookProvider,
                             books: bookProvider
                         }}
                         authProvider={authProvider}
@@ -172,27 +163,6 @@ const App: React.FC = () => {
                                     /> */}
                                  
                                 </Route>
-
-                               
-                                    <Route index element={<CourierList />} />
-                                    <Route
-                                        path="create"
-                                        element={<CourierCreate />}
-                                    />
-                                    <Route
-                                        path="edit/:id"
-                                        element={<CourierEdit />}
-                                    />
-                                    <Route
-                                        path="show/:id"
-                                        element={<CourierShow />}
-                                    />
-                               
-
-                                <Route
-                                    path="/reviews"
-                                    element={<ReviewsList />}
-                                />
                             </Route>
 
                             <Route

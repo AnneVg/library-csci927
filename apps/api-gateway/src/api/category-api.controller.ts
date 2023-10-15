@@ -1,21 +1,16 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  Logger,
-  Param,
-  Patch,
-  Post,
   Inject,
-  OnApplicationBootstrap
+  Logger,
+  OnApplicationBootstrap,
+  Param,
+  Patch
 } from '@nestjs/common';
-import { map } from 'rxjs/operators';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiParam } from '@nestjs/swagger';
-import { CreateBookInput } from './create-book.input.model';
-import { UpdateBookInput } from './update-book.input.model';
+import { map } from 'rxjs/operators';
 
 @Controller('categories')
 export class CategoryApiController  implements OnApplicationBootstrap {
@@ -58,6 +53,7 @@ export class CategoryApiController  implements OnApplicationBootstrap {
     @Param('id') id: string,
     @Body() input: { name: string },
   ) {
+    const { name } = input;
     const pattern = { cmd: 'update_category' };
     try {
       return await this.bookClientApp

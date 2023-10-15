@@ -32,6 +32,7 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
         // ],
     });
 
+    const { mutate: mutateDelete } = useDelete();
     const { mutate: mutateUpdate } = useUpdate();
 
     const moreMenu = (id: string) => (
@@ -39,7 +40,32 @@ export const BorrowList: React.FC<IResourceComponentsProps> = () => {
             mode="vertical"
             onClick={({ domEvent }) => domEvent.stopPropagation()}
         >
-
+            <Menu.Item
+                key="delete"
+                style={{
+                    fontSize: 15,
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight: 500,
+                }}
+                icon={
+                    <CloseCircleOutlined
+                        style={{
+                            color: "#EE2A1E",
+                            fontSize: 17,
+                        }}
+                    />
+                }
+                onClick={() => {
+                    mutateDelete({
+                        resource: "borrows",
+                        id,
+                        mutationMode: "optimistic",
+                    });
+                }}
+            >
+                {t("buttons.delete")}
+            </Menu.Item>
             <Menu.Item
                 key="return"
                 style={{

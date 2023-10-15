@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { RpcExceptionToHttpExceptionFilter } from '../middleware/rpc-exception.filter';
+import { AppModule } from './app.module';
 
 const allowedOrigins = [
   'http://localhost:3000',
@@ -42,6 +43,8 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.useGlobalFilters(new RpcExceptionToHttpExceptionFilter());
 
   await app.listen(process.env.PORT || 4200);
 }

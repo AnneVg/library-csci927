@@ -490,6 +490,7 @@
             "duedate": "Due date",
             "createdAt": "CreatedAt",
             "isActive": "Is Active",
+            "isbn": "Isbn",
             "images": {
                 "label": "Images",
                 "description": "Add user picture",

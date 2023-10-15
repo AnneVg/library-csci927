@@ -80,95 +80,9 @@ export const Header: React.FC = () => {
     const [value, setValue] = useState<string>("");
     const [options, setOptions] = useState<IOptions[]>([]);
 
-    const { refetch: refetchOrders } = useList<IOrder>({
-        resource: "orders",
-        config: {
-            filters: [{ field: "q", operator: "contains", value }],
-        },
-        queryOptions: {
-            enabled: false,
-            onSuccess: (data) => {
-                const orderOptionGroup = data.data.map((item) =>
-                    renderItem(
-                        `${item.store.title} / #${item.orderNumber}`,
-                        "/images/default-order-img.png",
-                        `/orders/show/${item.id}`,
-                    ),
-                );
-                if (orderOptionGroup.length > 0) {
-                    setOptions((prevOptions) => [
-                        ...prevOptions,
-                        {
-                            label: renderTitle(t("orders.orders")),
-                            options: orderOptionGroup,
-                        },
-                    ]);
-                }
-            },
-        },
-    });
-
-    const { refetch: refetchStores } = useList<IStore>({
-        resource: "stores",
-        config: {
-            filters: [{ field: "q", operator: "contains", value }],
-        },
-        queryOptions: {
-            enabled: false,
-            onSuccess: (data) => {
-                const storeOptionGroup = data.data.map((item) =>
-                    renderItem(
-                        item.title,
-                        "/images/default-store-img.png",
-                        `/stores/edit/${item.id}`,
-                    ),
-                );
-                if (storeOptionGroup.length > 0) {
-                    setOptions((prevOptions) => [
-                        ...prevOptions,
-                        {
-                            label: renderTitle(t("stores.stores")),
-                            options: storeOptionGroup,
-                        },
-                    ]);
-                }
-            },
-        },
-    });
-
-    const { refetch: refetchCouriers } = useList<ICourier>({
-        resource: "couriers",
-        config: {
-            filters: [{ field: "q", operator: "contains", value }],
-        },
-        queryOptions: {
-            enabled: false,
-            onSuccess: (data) => {
-                const courierOptionGroup = data.data.map((item) =>
-                    renderItem(
-                        `${item.name} ${item.surname}`,
-                        item.avatar[0].url,
-                        `/couriers/show/${item.id}`,
-                    ),
-                );
-                if (courierOptionGroup.length > 0) {
-                    setOptions((prevOptions) => [
-                        ...prevOptions,
-                        {
-                            label: renderTitle(t("couriers.couriers")),
-                            options: courierOptionGroup,
-                        },
-                    ]);
-                }
-            },
-        },
-    });
 
     useEffect(() => {
         setOptions([]);
-        refetchOrders();
-        refetchCouriers();
-        refetchStores();
     }, [value]);
 
     const menuItems: MenuProps["items"] = [...(i18n.languages || [])]

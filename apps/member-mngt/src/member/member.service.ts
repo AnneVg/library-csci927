@@ -10,7 +10,11 @@ export class MemberService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllMembers() {
-    const members = await this.prisma.member.findMany({});
+    const members = await this.prisma.member.findMany({
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
     return members;
   }
 
@@ -18,6 +22,15 @@ export class MemberService {
     const member = this.prisma.member.findUnique({
       where: {
         id: id,
+      },
+    });
+    return member;
+  }
+
+  async getMemberByStudentId(id: string) {
+    const member = this.prisma.member.findFirst({
+      where: {
+        studentId: id,
       },
     });
     return member;

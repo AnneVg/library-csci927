@@ -24,7 +24,7 @@ model Book {
   id               String          @id @default(cuid())
   title            String
   author           String
-  isbn             String
+  isbn             String          @unique
   shortDescription String          @map("short_description")
   categoryId       String?         @map("category_id")
   category         Category?       @relation(fields: [categoryId], references: [id])

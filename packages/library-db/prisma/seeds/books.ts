@@ -75,7 +75,7 @@ export const books = [
     {
         id: 'qaig6sb1ydkwiertz0dgcckm',
         title: "Harry Potter and the Sorcerer's Stone",
-        isbn: '978-0590353427',
+        isbn: '978-0530373427',
         shortDescription: 'The first book in the Harry Potter series',
         categoryId: 'ckqqvbb001t1cy6up9tm55yt7',
         location: 'Library',
@@ -111,7 +111,7 @@ export const books = [
     {
         id: 'k673uvpyai9dxqxizcumvx2c',
         title: 'The Alchemist',
-        isbn: '978-0061120084',
+        isbn: '928-0061123084',
         shortDescription: "Paulo Coelho's philosophical novel",
         categoryId: 'ckqqvbb001t1cy6up9tm55yt7',
         location: 'Library',

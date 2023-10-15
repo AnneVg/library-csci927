@@ -59,8 +59,8 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
-                                        label={t("borrows.fields.bookId")}
-                                        name="bookId"
+                                        label={t("borrows.fields.isbn")}
+                                        name="isbn"
                                         rules={[
                                             {
                                                 required: true,
@@ -70,7 +70,7 @@ export const BorrowCreate: React.FC<IResourceComponentsProps> = () => {
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
-                                        label={t("borrows.field.duedate")}
+                                        label={t("borrows.fields.duedate")}
                                         name="dueDate"
                                         rules={[
                                             {

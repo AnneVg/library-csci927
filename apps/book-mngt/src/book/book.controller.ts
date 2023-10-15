@@ -1,17 +1,8 @@
 // receive service call
 import {
-  Body,
   Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Logger,
-  Param,
-  Patch,
-  Post,
-  Query,
+  Logger
 } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
 import { MessagePattern } from '@nestjs/microservices';
 import { BookService } from './book.service';
 import { CreateBookInput } from './create-book.input.model';
@@ -52,12 +43,8 @@ export class BookController {
 
   @MessagePattern({ cmd: 'create_book' })
   async createBook(bookInput: CreateBookInput) {
-    try {
-      const book = await this.bookService.addBook(bookInput);
-      return book;
-    } catch (err) {
-      this.logger.error(err);
-    }
+    const book = await this.bookService.addBook(bookInput);
+    return book;
   }
 
   @MessagePattern({ cmd: 'update_book' })

@@ -1,5 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { CreateBorrowInput } from './create-borrow.input.model';
 import { BorrowService } from './borrow.service';
 import { UpdateBorrowInput } from './update-borrow.input.model';
@@ -41,12 +41,13 @@ export class BorrowController {
     }
   }
 
-  // @MessagePattern({ cmd: 'delete_borrow' })
-  // async deleteMember(id: string) {
-  //   try {
-  //     return await this.borrowService.deleteBorrow(id);
-  //   } catch (err) {
-  //     this.logger.error(err);
-  //   }
-  // }
+  @MessagePattern({ cmd: 'delete_borrow' })
+  async deleteMember(id: string) {
+    try {
+      return await this.borrowService.deleteBorrow(id);
+    } catch (err) {
+      this.logger.error(err);
+      throw new RpcException(err.message);
+    }
+  }
 }
