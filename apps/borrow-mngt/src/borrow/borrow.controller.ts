@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { CreateBorrowInput } from './create-borrow.input.model';
 import { BorrowService } from './borrow.service';
@@ -26,6 +26,10 @@ export class BorrowController {
       return borrow;
     } catch (err) {
       this.logger.error(err);
+      throw new RpcException({
+        status: HttpStatus.BAD_REQUEST,
+        message: err.message
+      });
     }
   }
 

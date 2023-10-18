@@ -12,6 +12,13 @@
     "build:api": "turbo run build --filter=*-mngt",
     "db:deploy": "turbo run db:deploy --filter=library-db",
     "format": "turbo run format",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "./scripts/start.sh",
+    "stop": "./scripts/stop.sh",
+    "start:member-mngt": "turbo run start --filter=member-mngt",
+    "start:book-mngt": "turbo run start --filter=book-mngt",
+    "start:borrow-mngt": "turbo run start --filter=borrow-mngt",
+    "start:api-gateway": "turbo run start --filter=api-gateway",
+    "start:frontend": "turbo run start --filter=frontend"
   }
 }

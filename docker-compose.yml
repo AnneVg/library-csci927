@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    ports:
+      - '5431:5432'
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 5s
+      timeout: 2s
+      retries: 20
+    environment:
+      POSTGRES_USER: library
+      POSTGRES_PASSWORD: library
+
+  library-db:
+    build:
+      context: ./
+      dockerfile: ./packages/library-db/Dockerfile
+    env_file: ./packages/library-db/.env
+    depends_on:
+      - db
+
+  member-mngt:
+    build:
+      context: ./
+      dockerfile: ./apps/member-mngt/Dockerfile
+    ports:
+      - "4201:4201"
+    depends_on:
+      - db
+      - library-db
+    env_file: ./apps/member-mngt/.env
+
+  book-mngt:
+    build:
+      context: ./
+      dockerfile: ./apps/book-mngt/Dockerfile
+    ports:
+      - "4202:4202"
+    depends_on:
+      - db
+      - library-db
+    env_file: ./apps/book-mngt/.env
+
+  borrow-mngt:
+    build:
+      context: ./
+      dockerfile: ./apps/borrow-mngt/Dockerfile
+    ports:
+      - "4203:4203"
+    depends_on:
+      - db
+      - library-db
+      - member-mngt
+      - book-mngt
+    env_file: ./apps/borrow-mngt/.env
+
+  api-gateway:
+    build:
+      context: ./
+      dockerfile: ./apps/api-gateway/Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - member-mngt
+      - book-mngt
+      - borrow-mngt
+    env_file: ./apps/api-gateway/.env
+
+  frontend:
+    build:
+      context: ./
+      dockerfile: ./apps/frontend/Dockerfile
+    ports:
+      - "5173:80"
+    env_file: ./apps/frontend/.env

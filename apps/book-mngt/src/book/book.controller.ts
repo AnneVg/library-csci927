@@ -3,7 +3,7 @@ import {
   Controller,
   Logger
 } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { BookService } from './book.service';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
@@ -23,9 +23,17 @@ export class BookController {
     return await this.bookService.getBookByIsbn(isbn);
   }
 
-  @MessagePattern({ cmd: 'check_book_available' })
-  async checkBookAvailable(id: string) {
-    return await this.bookService.checkAvailableBook(id);
+  @MessagePattern({ cmd: 'check_book_available_by_isbn' })
+  async checkBookAvailableByIsbn(isbn: string) {
+    const book = await this.bookService.getBookByIsbn(isbn);
+
+    if (!book) throw new RpcException(`Book with isbn "${isbn}" does not exist in the library.`);
+
+    if (book.status !== 'available') throw new RpcException(`Book with isbn "${isbn}" is not available.`);
+
+    if (book.stock < 1) throw new RpcException(`Book with isbn "${isbn}" is out of stock.`);
+
+    return book;
   }
 
   @MessagePattern({ cmd: 'get_books' })

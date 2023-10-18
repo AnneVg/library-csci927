@@ -112,7 +112,6 @@ export class BookService {
         id: id,
       },
     });
-    console.log('book', book);
     if (book.stock > 0 && book.status == "available")
       return true;
     return false;

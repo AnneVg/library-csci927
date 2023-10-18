@@ -1,0 +1,1907 @@
+diff --git a/apps/api-gateway/.dockerignore b/apps/api-gateway/.dockerignore
+new file mode 100644
+index 0000000..6c65c27
+--- /dev/null
++++ b/apps/api-gateway/.dockerignore
+@@ -0,0 +1,6 @@
++
++node_modules
++.git
++.gitignore
++*.md
++dist
+\ No newline at end of file
+diff --git a/apps/api-gateway/Dockerfile b/apps/api-gateway/Dockerfile
+new file mode 100644
+index 0000000..b807b37
+--- /dev/null
++++ b/apps/api-gateway/Dockerfile
+@@ -0,0 +1,5 @@
++FROM base
++COPY --from=library-prod-deps /app/apps/member-mngt/node_modules/ /app/apps/member-mngt/node_modules
++COPY --from=library-build /app/apps/member-mngt/dist /app/apps/member-mngt/dist
++EXPOSE 4201
++CMD [ "pnpm", "start" ]
+\ No newline at end of file
+diff --git a/apps/api-gateway/middleware/rpc-exception.filter.ts b/apps/api-gateway/middleware/rpc-exception.filter.ts
+index f12a2c5..12e38b3 100644
+--- a/apps/api-gateway/middleware/rpc-exception.filter.ts
++++ b/apps/api-gateway/middleware/rpc-exception.filter.ts
+@@ -1,14 +1,14 @@
+ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from "@nestjs/common";
+ import { RpcException } from "@nestjs/microservices";
+ 
+-@Catch(RpcException)
++@Catch()
+ export class RpcExceptionToHttpExceptionFilter implements ExceptionFilter {
+-  catch(exception: RpcException, host: ArgumentsHost) {
++  catch(exception: any, host: ArgumentsHost) {
+     const ctx = host.switchToHttp();
+     const response = ctx.getResponse();
+ 
+     // You can further customize the status code and the response based on the exception message or error code
+-    const status = HttpStatus.BAD_REQUEST;
++    const status = exception.status ?? HttpStatus.BAD_REQUEST;
+ 
+     response.status(status).json({
+       statusCode: status,
+diff --git a/apps/api-gateway/package.json b/apps/api-gateway/package.json
+index 76bc178..945880f 100644
+--- a/apps/api-gateway/package.json
++++ b/apps/api-gateway/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "book-mngt",
++  "name": "api-gateway",
+   "version": "0.0.1",
+   "description": "",
+   "author": "",
+diff --git a/apps/api-gateway/src/api/borrow-api.controller.ts b/apps/api-gateway/src/api/borrow-api.controller.ts
+index b4886aa..7bfb228 100644
+--- a/apps/api-gateway/src/api/borrow-api.controller.ts
++++ b/apps/api-gateway/src/api/borrow-api.controller.ts
+@@ -58,67 +58,12 @@ export class BorrowApiController implements OnApplicationBootstrap {
+   }
+ 
+   @Post()
+-  @UseFilters(RpcExceptionToHttpExceptionFilter)
+   async createBorrow(@Body() borrowInput: ICreateBorrowInput) {
+-
+-    const patternGetMember = { cmd: 'get_member_by_student_id' };
+-    const memberObs = await this.memberClientApp
+-      .send(patternGetMember, borrowInput.studentId);
+-
+-    const member = await lastValueFrom(memberObs);
+-    if (!member) throw new HttpException({
+-      status: HttpStatus.NOT_FOUND,
+-      message: `Student with id "${borrowInput.studentId}" does not exist.`
+-    }, HttpStatus.NOT_FOUND);
+-
+-    if (member.status !== 'active') throw new HttpException({
+-      status: HttpStatus.BAD_REQUEST,
+-      message: `Student with id "${borrowInput.studentId}" is not active.`
+-    }, HttpStatus.BAD_REQUEST);
+-
+-    const patternGetBookByIsbn = { cmd: 'get_book_by_isbn' };
+-    const bookObs = await this.bookClientApp
+-      .send(patternGetBookByIsbn, borrowInput.isbn);
+-    const book = await lastValueFrom(bookObs);
+-
+-    if (!book) {
+-      throw new HttpException({
+-        status: HttpStatus.NOT_FOUND,
+-        message: `Book with isbn "${borrowInput.isbn}" does not exist in the library.`
+-      }, HttpStatus.NOT_FOUND);
+-    }
+-
+-    if (book.status !== 'available') {
+-      throw new HttpException({
+-        status: HttpStatus.BAD_REQUEST,
+-        message: `Book with isbn "${borrowInput.isbn}" is not available.`
+-      }, HttpStatus.BAD_REQUEST);
+-    }
+-
+-    if (book.stock < 1) {
+-      throw new HttpException({
+-        status: HttpStatus.BAD_REQUEST,
+-        message: `Book with isbn "${borrowInput.isbn}" is out of stock.`
+-      }, HttpStatus.BAD_REQUEST);
+-    }
+-
+-    const patternCheckBookAvaiable = { cmd: 'check_book_available' };
+-    const bookAvailableObs = await this.bookClientApp
+-      .send(patternCheckBookAvaiable, book.id);
+-
+-    const bookAvailable = await lastValueFrom(bookAvailableObs);
+-
+-    if (!bookAvailable) {
+-      throw new HttpException({
+-        status: HttpStatus.BAD_REQUEST,
+-        message: `Book with isbn "${borrowInput.isbn}" is not available.`
+-      }, HttpStatus.BAD_REQUEST)
+-    }
+-
++    
+     const pattern = { cmd: 'create_borrow' };
+     return await lastValueFrom(this.borrowClientApp
+       .send(pattern, borrowInput));
+-
++      
+   }
+ 
+   @Patch(':id')
+diff --git a/apps/book-mngt/.dockerignore b/apps/book-mngt/.dockerignore
+new file mode 100644
+index 0000000..6c65c27
+--- /dev/null
++++ b/apps/book-mngt/.dockerignore
+@@ -0,0 +1,6 @@
++
++node_modules
++.git
++.gitignore
++*.md
++dist
+\ No newline at end of file
+diff --git a/apps/book-mngt/Dockerfile b/apps/book-mngt/Dockerfile
+new file mode 100644
+index 0000000..b92c6fa
+--- /dev/null
++++ b/apps/book-mngt/Dockerfile
+@@ -0,0 +1,5 @@
++FROM base
++COPY --from=library-prod-deps /app/apps/book-mngt/node_modules/ /app/apps/book-mngt/node_modules
++COPY --from=library-build /app/apps/book-mngt/dist /app/apps/book-mngt/dist
++EXPOSE 4203
++CMD [ "pnpm", "start" ]
+\ No newline at end of file
+diff --git a/apps/book-mngt/src/book/book.controller.ts b/apps/book-mngt/src/book/book.controller.ts
+index c199768..ade9276 100644
+--- a/apps/book-mngt/src/book/book.controller.ts
++++ b/apps/book-mngt/src/book/book.controller.ts
+@@ -3,7 +3,7 @@ import {
+   Controller,
+   Logger
+ } from '@nestjs/common';
+-import { MessagePattern } from '@nestjs/microservices';
++import { MessagePattern, RpcException } from '@nestjs/microservices';
+ import { BookService } from './book.service';
+ import { CreateBookInput } from './create-book.input.model';
+ import { UpdateBookInput } from './update-book.input.model';
+@@ -23,9 +23,17 @@ export class BookController {
+     return await this.bookService.getBookByIsbn(isbn);
+   }
+ 
+-  @MessagePattern({ cmd: 'check_book_available' })
+-  async checkBookAvailable(id: string) {
+-    return await this.bookService.checkAvailableBook(id);
++  @MessagePattern({ cmd: 'check_book_available_by_isbn' })
++  async checkBookAvailableByIsbn(isbn: string) {
++    const book = await this.bookService.getBookByIsbn(isbn);
++
++    if (!book) throw new RpcException(`Book with isbn "${isbn}" does not exist in the library.`);
++
++    if (book.status !== 'available') throw new RpcException(`Book with isbn "${isbn}" is not available.`);
++
++    if (book.stock < 1) throw new RpcException(`Book with isbn "${isbn}" is out of stock.`);
++
++    return book;
+   }
+ 
+   @MessagePattern({ cmd: 'get_books' })
+diff --git a/apps/book-mngt/src/book/book.service.ts b/apps/book-mngt/src/book/book.service.ts
+index 7a977f6..c22d368 100644
+--- a/apps/book-mngt/src/book/book.service.ts
++++ b/apps/book-mngt/src/book/book.service.ts
+@@ -112,7 +112,6 @@ export class BookService {
+         id: id,
+       },
+     });
+-    console.log('book', book);
+     if (book.stock > 0 && book.status == "available")
+       return true;
+     return false;
+diff --git a/apps/borrow-mngt/.dockerignore b/apps/borrow-mngt/.dockerignore
+new file mode 100644
+index 0000000..6c65c27
+--- /dev/null
++++ b/apps/borrow-mngt/.dockerignore
+@@ -0,0 +1,6 @@
++
++node_modules
++.git
++.gitignore
++*.md
++dist
+\ No newline at end of file
+diff --git a/apps/borrow-mngt/Dockerfile b/apps/borrow-mngt/Dockerfile
+new file mode 100644
+index 0000000..7f0e7ce
+--- /dev/null
++++ b/apps/borrow-mngt/Dockerfile
+@@ -0,0 +1,5 @@
++FROM base
++COPY --from=library-prod-deps /app/apps/borrow-mngt/node_modules/ /app/apps/borrow-mngt/node_modules
++COPY --from=library-build /app/apps/borrow-mngt/dist /app/apps/borrow-mngt/dist
++EXPOSE 4203
++CMD [ "pnpm", "start" ]
+\ No newline at end of file
+diff --git a/apps/borrow-mngt/env.example b/apps/borrow-mngt/env.example
+index 188bd1e..0259e84 100644
+--- a/apps/borrow-mngt/env.example
++++ b/apps/borrow-mngt/env.example
+@@ -1 +1,5 @@
+ PORT=4202
++MEMBER_SERVICE_HOST=localhost
++MEMBER_SERVICE_PORT=4201
++BOOK_SERVICE_HOST=localhost
++BOOK_SERVICE_PORT=4203
+diff --git a/apps/borrow-mngt/src/borrow/borrow.controller.ts b/apps/borrow-mngt/src/borrow/borrow.controller.ts
+index a7475fd..56b62ab 100644
+--- a/apps/borrow-mngt/src/borrow/borrow.controller.ts
++++ b/apps/borrow-mngt/src/borrow/borrow.controller.ts
+@@ -1,4 +1,4 @@
+-import { Controller, Logger } from '@nestjs/common';
++import { Controller, HttpException, HttpStatus, Logger } from '@nestjs/common';
+ import { MessagePattern, RpcException } from '@nestjs/microservices';
+ import { CreateBorrowInput } from './create-borrow.input.model';
+ import { BorrowService } from './borrow.service';
+@@ -26,6 +26,10 @@ export class BorrowController {
+       return borrow;
+     } catch (err) {
+       this.logger.error(err);
++      throw new RpcException({
++        status: HttpStatus.BAD_REQUEST,
++        message: err.message
++      });
+     }
+   }
+ 
+diff --git a/apps/borrow-mngt/src/borrow/borrow.module.ts b/apps/borrow-mngt/src/borrow/borrow.module.ts
+index 9a11efe..2d396de 100644
+--- a/apps/borrow-mngt/src/borrow/borrow.module.ts
++++ b/apps/borrow-mngt/src/borrow/borrow.module.ts
+@@ -1,8 +1,9 @@
+ import { Module } from '@nestjs/common';
++import { ConfigModule, ConfigService } from '@nestjs/config';
++import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+ import { PrismaModule } from '../prisma/prisma.module';
+-import { BorrowService } from './borrow.service';
+ import { BorrowController } from './borrow.controller';
+-import { ConfigModule } from '@nestjs/config';
++import { BorrowService } from './borrow.service';
+ 
+ @Module({
+   imports: [
+@@ -11,7 +12,35 @@ import { ConfigModule } from '@nestjs/config';
+       isGlobal: true,
+     }),
+   ],
+-  providers: [BorrowService],
++  providers: [
++    BorrowService,
++    {
++      provide: 'MEMBERS_SERVICE',
++      inject: [ConfigService],
++      useFactory: (configService: ConfigService) => {
++        return ClientProxyFactory.create({
++          transport: Transport.TCP,
++          options: {
++            host: configService.get('MEMBER_SERVICE_HOST'),
++            port: configService.get('MEMBER_SERVICE_PORT'),
++          },
++        });
++      },
++    },
++    {
++      provide: 'BOOKS_SERVICE',
++      inject: [ConfigService],
++      useFactory: (configService: ConfigService) => {
++        return ClientProxyFactory.create({
++          transport: Transport.TCP,
++          options: {
++            host: configService.get('BOOK_SERVICE_HOST'),
++            port: configService.get('BOOK_SERVICE_PORT'),
++          },
++        });
++      },
++    }
++  ],
+   controllers: [BorrowController],
+ })
+ export class BorrowModule {}
+diff --git a/apps/borrow-mngt/src/borrow/borrow.service.ts b/apps/borrow-mngt/src/borrow/borrow.service.ts
+index 653356c..6a05983 100644
+--- a/apps/borrow-mngt/src/borrow/borrow.service.ts
++++ b/apps/borrow-mngt/src/borrow/borrow.service.ts
+@@ -1,14 +1,24 @@
+-import { Injectable, Logger, Patch } from '@nestjs/common';
++import { Inject, Injectable, Logger, OnApplicationBootstrap, Patch } from '@nestjs/common';
+ import { PrismaService } from 'src/prisma/prisma.service';
+ import { CreateBorrowInput } from './create-borrow.input.model';
+ import { UpdateBorrowInput } from './update-borrow.input.model';
+-import { RpcException } from '@nestjs/microservices';
++import { ClientProxy, RpcException } from '@nestjs/microservices';
++import { lastValueFrom } from 'rxjs';
+ 
+ @Injectable()
+-export class BorrowService {
++export class BorrowService implements OnApplicationBootstrap {
+   private logger: Logger = new Logger(this.constructor.name);
+ 
+-  constructor(private readonly prisma: PrismaService) {}
++  constructor(
++    private readonly prisma: PrismaService,
++    @Inject('MEMBERS_SERVICE') private memberClientApp: ClientProxy,
++    @Inject('BOOKS_SERVICE') private bookClientApp: ClientProxy,
++  ) { }
++
++  async onApplicationBootstrap() {
++    await this.memberClientApp.connect();
++    await this.bookClientApp.connect();
++  }
+ 
+   async getAllBorrows() {
+     const borrows = await this.prisma.borrowingBook.findMany({
+@@ -34,25 +44,18 @@ export class BorrowService {
+   }
+ 
+   async addBorrow(createBorrowInput: CreateBorrowInput) {
+-    const student = await this.prisma.member.findFirst({
+-      where: {
+-        studentId: createBorrowInput.studentId
+-      }
+-    });
+ 
+-    if (!student) throw new RpcException('Invalid student');
+-    if (student.status !== 'active') throw new RpcException('Student is not active');
++    const memberPattern = { cmd: 'check_member_by_student_id'};
++    const studentObs = this.memberClientApp
++      .send(memberPattern, createBorrowInput.studentId);
+ 
+-    const book = await this.prisma.book.findFirst({
+-      where: {
+-        isbn: createBorrowInput.isbn
+-      }
+-    });
+-    if (!book) throw Error('Invalid book');
++    const student = await lastValueFrom(studentObs);
+ 
+-    if (book.status != 'available') throw new RpcException('Book is not available');
++    const bookPattern = { cmd: 'check_book_available_by_isbn'};
++    const bookObs = this.bookClientApp
++      .send(bookPattern, createBorrowInput.isbn);
+ 
+-    if (book.stock < 1) throw new RpcException('Out of stock');
++    const book = await lastValueFrom(bookObs);
+ 
+     const dataToInsert = {
+       data: {
+@@ -119,7 +122,7 @@ export class BorrowService {
+         }
+       });
+     }
+-  
++
+     return updatedBorrow;
+   }
+ 
+@@ -129,6 +132,6 @@ export class BorrowService {
+         id: borrowId
+       }
+     });
+-  
++
+   }
+ }
+diff --git a/apps/frontend/.dockerignore b/apps/frontend/.dockerignore
+new file mode 100644
+index 0000000..6c65c27
+--- /dev/null
++++ b/apps/frontend/.dockerignore
+@@ -0,0 +1,6 @@
++
++node_modules
++.git
++.gitignore
++*.md
++dist
+\ No newline at end of file
+diff --git a/apps/frontend/Dockerfile b/apps/frontend/Dockerfile
+new file mode 100644
+index 0000000..822ab9b
+--- /dev/null
++++ b/apps/frontend/Dockerfile
+@@ -0,0 +1,8 @@
++# Stage 2: Serve the React app
++FROM nginx:alpine
++COPY --from=library-build /app/apps/frontend/nginx/nginx.conf /etc/nginx/conf.d/default.conf
++WORKDIR /usr/share/nginx/html
++RUN rm -rf ./*
++COPY --from=library-build /app/apps/frontend/dist /usr/share/nginx/html
++EXPOSE 80
++CMD ["nginx", "-g", "daemon off;"]
+\ No newline at end of file
+diff --git a/apps/frontend/nginx/nginx.conf b/apps/frontend/nginx/nginx.conf
+new file mode 100644
+index 0000000..f4c3ccb
+--- /dev/null
++++ b/apps/frontend/nginx/nginx.conf
+@@ -0,0 +1,16 @@
++server {    
++
++    listen 80;
++
++    location / {
++        root /usr/share/nginx/html;
++        index index.html index.htm;
++        try_files $uri /index.html =404;
++    }
++
++    error_page 500 502 503 504 /50x.html;
++
++    location = /50x.html {
++        root /usr/share/nginx/html;
++    }
++}
+\ No newline at end of file
+diff --git a/apps/frontend/package.json b/apps/frontend/package.json
+index 227096a..ccb1be4 100644
+--- a/apps/frontend/package.json
++++ b/apps/frontend/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "library-frontend",
++  "name": "frontend",
+   "version": "0.0.1",
+   "private": true,
+   "dependencies": {
+diff --git a/apps/frontend/src/App.tsx b/apps/frontend/src/App.tsx
+index 6d31388..7685615 100644
+--- a/apps/frontend/src/App.tsx
++++ b/apps/frontend/src/App.tsx
+@@ -18,7 +18,7 @@ import routerProvider, {
+ } from "@refinedev/react-router-v6";
+ import jsonServerDataProvider from "@refinedev/simple-rest";
+ import React from "react";
+-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
++import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+ import { authProvider } from "./authProvider";
+ 
+ import "dayjs/locale/de";
+@@ -47,7 +47,7 @@ const App: React.FC = () => {
+     const { t, i18n } = useTranslation();
+ 
+     const i18nProvider = {
+-        translate: (key: string, params: object) => t(key, params),
++        translate: (key: string, options: string) => t(key, options),
+         changeLocale: (lang: string) => i18n.changeLanguage(lang),
+         getLocale: () => i18n.language,
+     };
+@@ -126,8 +126,14 @@ const App: React.FC = () => {
+                                     </Authenticated>
+                                 }
+                             >
++                                <Route
++                                    index
++                                    path="/"
++                                    element={<Navigate to="/books" replace />}
++                                />
+                                 
+                                 <Route
++                                    index
+                                     path="/books"
+                                     element={<BookList />}
+                                 />
+@@ -168,7 +174,7 @@ const App: React.FC = () => {
+                             <Route
+                                 element={
+                                     <Authenticated fallback={<Outlet />}>
+-                                        <NavigateToResource resource="dashboard" />
++                                        <NavigateToResource resource="members" />
+                                     </Authenticated>
+                                 }
+                             >
+diff --git a/apps/frontend/src/components/dashboard/dailyOrders/index.tsx b/apps/frontend/src/components/dashboard/dailyOrders/index.tsx
+deleted file mode 100644
+index 9836563..0000000
+--- a/apps/frontend/src/components/dashboard/dailyOrders/index.tsx
++++ /dev/null
+@@ -1,79 +0,0 @@
+-import { useMemo } from "react";
+-import { useApiUrl, useCustom, useTranslate } from "@refinedev/core";
+-import { Typography } from "antd";
+-import { Column } from "@ant-design/charts";
+-import { ColumnConfig } from "@ant-design/plots/lib/components/column";
+-
+-import { IncreaseIcon, DecreaseIcon } from "../../../components/icons";
+-
+-import { ISalesChart } from "../../../interfaces";
+-import { DailyOrderWrapper, TitleAreNumber, TitleArea } from "./styled";
+-
+-export const DailyOrders: React.FC = () => {
+-    const t = useTranslate();
+-    const API_URL = useApiUrl();
+-
+-    const url = `${API_URL}/dailyOrders`;
+-    const { data, isLoading } = useCustom<{
+-        data: ISalesChart[];
+-        total: number;
+-        trend: number;
+-    }>({ url, method: "get" });
+-
+-    const { Text, Title } = Typography;
+-
+-    const config = useMemo(() => {
+-        const config: ColumnConfig = {
+-            data: data?.data.data || [],
+-            loading: isLoading,
+-            padding: 0,
+-            xField: "date",
+-            yField: "value",
+-            maxColumnWidth: 16,
+-            columnStyle: {
+-                radius: [4, 4, 0, 0],
+-            },
+-            color: "rgba(255, 255, 255, 0.5)",
+-            tooltip: {
+-                customContent: (title, data) => {
+-                    return `<div style="padding: 8px 4px; font-size:16px; font-weight:600">${data[0]?.value}</div>`;
+-                },
+-            },
+-
+-            xAxis: {
+-                label: null,
+-                line: null,
+-                tickLine: null,
+-            },
+-            yAxis: {
+-                label: null,
+-                grid: null,
+-                tickLine: null,
+-            },
+-        };
+-
+-        return config;
+-    }, [data]);
+-
+-    return (
+-        <DailyOrderWrapper>
+-            <TitleArea>
+-                <Title level={3}>{t("dashboard.dailyOrders.title")}</Title>
+-                <TitleAreNumber>
+-                    <Text strong>{data?.data.total ?? 0} </Text>
+-
+-                    {(data?.data?.trend ?? 0) > 0 ? (
+-                        <IncreaseIcon />
+-                    ) : (
+-                        <DecreaseIcon />
+-                    )}
+-                </TitleAreNumber>
+-            </TitleArea>
+-            <Column
+-                style={{ padding: 0, height: 135 }}
+-                appendPadding={10}
+-                {...config}
+-            />
+-        </DailyOrderWrapper>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/dailyOrders/styled.tsx b/apps/frontend/src/components/dashboard/dailyOrders/styled.tsx
+deleted file mode 100644
+index 8aa5a4f..0000000
+--- a/apps/frontend/src/components/dashboard/dailyOrders/styled.tsx
++++ /dev/null
+@@ -1,49 +0,0 @@
+-import styled from "@emotion/styled";
+-
+-export const DailyOrderWrapper = styled.div`
+-    height: 232px;
+-    display: flex;
+-    flex-direction: column;
+-    justify-content: space-between;
+-
+-    @media screen and (max-width: 576px) {
+-        height: 192px;
+-    }
+-`;
+-
+-export const TitleArea = styled.div`
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: flex-start;
+-
+-    h3,
+-    span {
+-        color: #ffffff !important;
+-        margin-bottom: 0 !important;
+-    }
+-
+-    @media screen and (max-width: 576px) {
+-        span {
+-            font-size: 16px !important;
+-            line-height: 1.2;
+-        }
+-    }
+-`;
+-
+-export const TitleAreNumber = styled.div`
+-    display: flex;
+-    align-items: center;
+-    line-height: 1.1;
+-
+-    span {
+-        font-size: 28px;
+-        margin-right: 5px;
+-    }
+-
+-    @media screen and (max-width: 576px) {
+-        span {
+-            font-size: 30px !important;
+-            line-height: 0.9;
+-        }
+-    }
+-`;
+diff --git a/apps/frontend/src/components/dashboard/dailyRevenue/index.tsx b/apps/frontend/src/components/dashboard/dailyRevenue/index.tsx
+deleted file mode 100644
+index 853c2e5..0000000
+--- a/apps/frontend/src/components/dashboard/dailyRevenue/index.tsx
++++ /dev/null
+@@ -1,151 +0,0 @@
+-import { useMemo, useState } from "react";
+-import { useApiUrl, useCustom, useTranslate } from "@refinedev/core";
+-import { NumberField } from "@refinedev/antd";
+-import { Typography } from "antd";
+-import { Line } from "@ant-design/charts";
+-import { LineConfig } from "@ant-design/plots/lib/components/line";
+-import dayjs, { Dayjs } from "dayjs";
+-
+-import { IncreaseIcon, DecreaseIcon } from "../../../components/icons";
+-
+-import { ISalesChart } from "../../../interfaces";
+-import {
+-    DailyRevenueWrapper,
+-    TitleAreNumber,
+-    TitleArea,
+-    TitleAreaAmount,
+-    RangePicker,
+-} from "./styled";
+-
+-export const DailyRevenue: React.FC = () => {
+-    const t = useTranslate();
+-    const API_URL = useApiUrl();
+-
+-    const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
+-        dayjs().subtract(7, "days").startOf("day"),
+-        dayjs().startOf("day"),
+-    ]);
+-    const [start, end] = dateRange;
+-
+-    const query = {
+-        start,
+-        end,
+-    };
+-
+-    const url = `${API_URL}/dailyRevenue`;
+-    const { data, isLoading } = useCustom<{
+-        data: ISalesChart[];
+-        total: number;
+-        trend: number;
+-    }>({
+-        url,
+-        method: "get",
+-        config: {
+-            query,
+-        },
+-    });
+-
+-    const config = useMemo(() => {
+-        const config: LineConfig = {
+-            data: data?.data.data || [],
+-            loading: isLoading,
+-            padding: "auto",
+-            xField: "date",
+-            yField: "value",
+-            color: "rgba(255, 255, 255, 0.5)",
+-            tooltip: {
+-                customContent: (title, data) => {
+-                    return `<div style="padding: 8px 4px; font-size:16px; font-weight:600">${data[0]?.value} $</div>`;
+-                },
+-            },
+-
+-            xAxis: {
+-                label: null,
+-                line: null,
+-            },
+-            yAxis: {
+-                label: null,
+-                grid: null,
+-            },
+-            smooth: true,
+-            lineStyle: {
+-                lineWidth: 4,
+-            },
+-        };
+-
+-        return config;
+-    }, [data]);
+-
+-    const disabledDate = (date: Dayjs) => date > dayjs();
+-
+-    return (
+-        <DailyRevenueWrapper>
+-            <TitleArea>
+-                <TitleAreaAmount>
+-                    <Typography.Title level={3}>
+-                        {t("dashboard.dailyRevenue.title")}
+-                    </Typography.Title>
+-                    <TitleAreNumber>
+-                        <NumberField
+-                            style={{ fontSize: 36 }}
+-                            strong
+-                            options={{
+-                                currency: "USD",
+-                                style: "currency",
+-                                notation: "compact",
+-                            }}
+-                            value={data?.data.total ?? 0}
+-                        />
+-                        {(data?.data?.trend ?? 0) > 0 ? (
+-                            <IncreaseIcon />
+-                        ) : (
+-                            <DecreaseIcon />
+-                        )}
+-                    </TitleAreNumber>
+-                </TitleAreaAmount>
+-
+-                <RangePicker
+-                    size="small"
+-                    value={dateRange}
+-                    onChange={(values) => {
+-                        if (values && values[0] && values[1]) {
+-                            setDateRange([values[0], values[1]]);
+-                        }
+-                    }}
+-                    disabledDate={disabledDate}
+-                    style={{
+-                        float: "right",
+-                        color: "#fffff !important",
+-                        background: "rgba(255, 255, 255, 0.3)",
+-                    }}
+-                    ranges={{
+-                        "This Week": [
+-                            dayjs().startOf("week"),
+-                            dayjs().endOf("week"),
+-                        ],
+-                        "Last Month": [
+-                            dayjs().startOf("month").subtract(1, "month"),
+-                            dayjs().endOf("month").subtract(1, "month"),
+-                        ],
+-                        "This Month": [
+-                            dayjs().startOf("month"),
+-                            dayjs().endOf("month"),
+-                        ],
+-                        "This Year": [
+-                            dayjs().startOf("year"),
+-                            dayjs().endOf("year"),
+-                        ],
+-                    }}
+-                    format="YYYY/MM/DD"
+-                />
+-            </TitleArea>
+-            <Line
+-                padding={0}
+-                appendPadding={10}
+-                height={135}
+-                style={{ maxHeight: "135px" }}
+-                {...config}
+-            />
+-        </DailyRevenueWrapper>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/dailyRevenue/styled.tsx b/apps/frontend/src/components/dashboard/dailyRevenue/styled.tsx
+deleted file mode 100644
+index e6262ce..0000000
+--- a/apps/frontend/src/components/dashboard/dailyRevenue/styled.tsx
++++ /dev/null
+@@ -1,72 +0,0 @@
+-import styled from "@emotion/styled";
+-import { DatePicker } from "antd";
+-
+-export const DailyRevenueWrapper = styled.div`
+-    height: 232px;
+-    display: flex;
+-    flex-direction: column;
+-    justify-content: space-between;
+-`;
+-
+-export const TitleArea = styled.div`
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: flex-start;
+-`;
+-
+-export const TitleAreaAmount = styled.div`
+-    display: flex;
+-    flex-direction: column;
+-
+-    h3,
+-    span {
+-        color: #ffffff !important;
+-        margin-bottom: 0 !important;
+-    }
+-
+-    @media screen and (max-width: 576px) {
+-        span {
+-            font-size: 16px !important;
+-            line-height: 1.2;
+-        }
+-    }
+-`;
+-
+-export const TitleAreNumber = styled.div`
+-    display: flex;
+-    align-items: center;
+-    line-height: 1;
+-
+-    img {
+-        margin-left: 5px;
+-    }
+-
+-    @media screen and (max-width: 576px) {
+-        span {
+-            font-size: 30px !important;
+-            line-height: 0.9;
+-        }
+-    }
+-`;
+-
+-export const RangePicker = styled(DatePicker.RangePicker)`
+-    height: 35px;
+-    float: "right";
+-    color: "#fffff !important";
+-    background: "rgba(255, 255, 255, 0.3)";
+-
+-    .ant-picker-input > input {
+-        color: #ffffff !important;
+-    }
+-
+-    &.ant-picker-focused {
+-        .ant-picker-separator {
+-            color: #ffffff;
+-        }
+-    }
+-
+-    .ant-picker-separator,
+-    .ant-picker-suffix {
+-        color: #ffffff;
+-    }
+-`;
+diff --git a/apps/frontend/src/components/dashboard/deliveryMap/index.tsx b/apps/frontend/src/components/dashboard/deliveryMap/index.tsx
+deleted file mode 100644
+index 9daf70b..0000000
+--- a/apps/frontend/src/components/dashboard/deliveryMap/index.tsx
++++ /dev/null
+@@ -1,67 +0,0 @@
+-import { useList, useNavigation } from "@refinedev/core";
+-
+-import { Map, MapMarker } from "../../../components";
+-import { IOrder } from "../../../interfaces";
+-
+-export const DeliveryMap: React.FC = () => {
+-    const { data: orderData } = useList<IOrder>({
+-        resource: "orders",
+-        config: {
+-            filters: [
+-                {
+-                    field: "status.text",
+-                    operator: "eq",
+-                    value: "On The Way",
+-                },
+-            ],
+-            pagination: {
+-                pageSize: 1000,
+-            },
+-        },
+-    });
+-
+-    const defaultProps = {
+-        center: {
+-            lat: 40.73061,
+-            lng: -73.935242,
+-        },
+-        zoom: 13,
+-    };
+-
+-    const { show } = useNavigation();
+-
+-    return (
+-        <Map {...defaultProps}>
+-            {orderData?.data.map((order) => {
+-                return (
+-                    <MapMarker
+-                        key={order.id}
+-                        onClick={() => show("orders", order.id)}
+-                        icon={{
+-                            url: "/images/marker-courier.svg",
+-                        }}
+-                        position={{
+-                            lat: Number(order.adress.coordinate[0]),
+-                            lng: Number(order.adress.coordinate[1]),
+-                        }}
+-                    />
+-                );
+-            })}
+-            {orderData?.data.map((order) => {
+-                return (
+-                    <MapMarker
+-                        key={order.id}
+-                        onClick={() => show("orders", order.id)}
+-                        icon={{
+-                            url: "/images/marker-location.svg",
+-                        }}
+-                        position={{
+-                            lat: Number(order.store.address.coordinate[0]),
+-                            lng: Number(order.store.address.coordinate[1]),
+-                        }}
+-                    />
+-                );
+-            })}
+-        </Map>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/index.ts b/apps/frontend/src/components/dashboard/index.ts
+deleted file mode 100644
+index 0e2ef3d..0000000
+--- a/apps/frontend/src/components/dashboard/index.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-export * from "./deliveryMap";
+-export * from "./dailyRevenue";
+-export * from "./dailyOrders";
+-export * from "./newCustomers";
+-export * from "./orderTimeline";
+-export * from "./trendingMenu";
+-export * from "./recentOrders";
+diff --git a/apps/frontend/src/components/dashboard/newCustomers/index.tsx b/apps/frontend/src/components/dashboard/newCustomers/index.tsx
+deleted file mode 100644
+index 1a2ba30..0000000
+--- a/apps/frontend/src/components/dashboard/newCustomers/index.tsx
++++ /dev/null
+@@ -1,87 +0,0 @@
+-import { Column } from "@ant-design/charts";
+-import { ColumnConfig } from "@ant-design/plots/lib/components/column";
+-import { useApiUrl, useCustom, useTranslate } from "@refinedev/core";
+-import { ConfigProvider, Typography, theme } from "antd";
+-import { useMemo } from "react";
+-
+-import { DecreaseIcon, IncreaseIcon } from "../../../components/icons";
+-
+-import { ISalesChart } from "../../../interfaces";
+-import { Header, HeaderNumbers, NewCustomersWrapper } from "./styled";
+-
+-export const NewCustomers: React.FC = () => {
+-    const t = useTranslate();
+-    const API_URL = useApiUrl();
+-
+-    const url = `${API_URL}/newCustomers`;
+-    const { data, isLoading } = useCustom<{
+-        data: ISalesChart[];
+-        total: number;
+-        trend: number;
+-    }>({ url, method: "get" });
+-
+-    const { Text, Title } = Typography;
+-
+-    const config = useMemo(() => {
+-        const config: ColumnConfig = {
+-            data: data?.data.data || [],
+-            loading: isLoading,
+-            padding: 0,
+-            xField: "date",
+-            yField: "value",
+-            maxColumnWidth: 16,
+-            columnStyle: {
+-                radius: [4, 4, 0, 0],
+-            },
+-            color: "rgba(255, 255, 255, 0.5)",
+-            tooltip: {
+-                customContent: (title, data) => {
+-                    return `<div style="padding: 8px 4px; font-size:16px; font-weight:600">${data[0]?.value}</div>`;
+-                },
+-            },
+-
+-            xAxis: {
+-                label: null,
+-                line: null,
+-                tickLine: null,
+-            },
+-            yAxis: {
+-                label: null,
+-                grid: null,
+-                tickLine: null,
+-            },
+-        };
+-
+-        return config;
+-    }, [data]);
+-
+-    return (
+-        <ConfigProvider
+-            theme={{
+-                algorithm: theme.darkAlgorithm,
+-            }}
+-        >
+-            <NewCustomersWrapper>
+-                <Header>
+-                    <Title level={3}>{t("dashboard.newCustomers.title")}</Title>
+-                    <HeaderNumbers>
+-                        <Text strong>{data?.data.total ?? 0}</Text>
+-                        <div>
+-                            <Text strong>{data?.data.trend ?? 0}%</Text>
+-                            {(data?.data?.trend ?? 0) > 0 ? (
+-                                <IncreaseIcon />
+-                            ) : (
+-                                <DecreaseIcon />
+-                            )}
+-                        </div>
+-                    </HeaderNumbers>
+-                </Header>
+-                <Column
+-                    style={{ padding: 0, height: 162 }}
+-                    appendPadding={10}
+-                    {...config}
+-                />
+-            </NewCustomersWrapper>
+-        </ConfigProvider>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/newCustomers/styled.tsx b/apps/frontend/src/components/dashboard/newCustomers/styled.tsx
+deleted file mode 100644
+index 780510f..0000000
+--- a/apps/frontend/src/components/dashboard/newCustomers/styled.tsx
++++ /dev/null
+@@ -1,40 +0,0 @@
+-import styled from "@emotion/styled";
+-
+-export const NewCustomersWrapper = styled.div`
+-    height: 232px;
+-    display: flex;
+-    flex-direction: column;
+-    justify-content: space-between;
+-
+-    @media screen and (max-width: 576px) {
+-        height: 212px;
+-    }
+-`;
+-
+-export const Header = styled.div`
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: flex-start;
+-`;
+-
+-export const HeaderNumbers = styled.div`
+-    font-size: 28px;
+-    text-align: right;
+-    line-height: 1.2;
+-
+-    div {
+-        font-size: 20px;
+-    }
+-
+-    img {
+-        margin-left: 5px;
+-    }
+-
+-    @media screen and (max-width: 576px) {
+-        font-size: 30px;
+-
+-        div {
+-            font-size: 20px;
+-        }
+-    }
+-`;
+diff --git a/apps/frontend/src/components/dashboard/orderTimeline/index.tsx b/apps/frontend/src/components/dashboard/orderTimeline/index.tsx
+deleted file mode 100644
+index e9c45c7..0000000
+--- a/apps/frontend/src/components/dashboard/orderTimeline/index.tsx
++++ /dev/null
+@@ -1,145 +0,0 @@
+-import { useTranslate, useNavigation } from "@refinedev/core";
+-import { useSimpleList } from "@refinedev/antd";
+-import {
+-    Typography,
+-    List as AntdList,
+-    Tooltip,
+-    ConfigProvider,
+-    theme,
+-} from "antd";
+-import dayjs from "dayjs";
+-import relativeTime from "dayjs/plugin/relativeTime";
+-
+-import { IOrder } from "../../../interfaces";
+-import {
+-    TimelineContent,
+-    CreatedAt,
+-    Number,
+-    Timeline,
+-    TimelineItem,
+-} from "./styled";
+-
+-dayjs.extend(relativeTime);
+-
+-export const OrderTimeline: React.FC = () => {
+-    const t = useTranslate();
+-    const { show } = useNavigation();
+-
+-    const { listProps } = useSimpleList<IOrder>({
+-        resource: "orders",
+-        initialSorter: [
+-            {
+-                field: "createdAt",
+-                order: "desc",
+-            },
+-        ],
+-        pagination: {
+-            pageSize: 6,
+-        },
+-        syncWithLocation: false,
+-    });
+-
+-    const { dataSource } = listProps;
+-
+-    const { Text } = Typography;
+-
+-    const orderStatusColor = (
+-        id: string,
+-    ):
+-        | { indicatorColor: string; backgroundColor: string; text: string }
+-        | undefined => {
+-        switch (id) {
+-            case "1":
+-                return {
+-                    indicatorColor: "orange",
+-                    backgroundColor: "#fff7e6",
+-                    text: "pending",
+-                };
+-            case "2":
+-                return {
+-                    indicatorColor: "cyan",
+-                    backgroundColor: "#e6fffb",
+-                    text: "ready",
+-                };
+-            case "3":
+-                return {
+-                    indicatorColor: "green",
+-                    backgroundColor: "#e6f7ff",
+-                    text: "on the way",
+-                };
+-            case "4":
+-                return {
+-                    indicatorColor: "blue",
+-                    backgroundColor: "#e6fffb",
+-                    text: "delivered",
+-                };
+-            case "5":
+-                return {
+-                    indicatorColor: "red",
+-                    backgroundColor: "#fff1f0",
+-                    text: "cancelled",
+-                };
+-            default:
+-                break;
+-        }
+-    };
+-
+-    return (
+-        <AntdList
+-            {...listProps}
+-            pagination={{
+-                ...listProps.pagination,
+-                simple: true,
+-            }}
+-        >
+-            <ConfigProvider theme={{ algorithm: theme.defaultAlgorithm }}>
+-                <Timeline>
+-                    {dataSource?.map(
+-                        ({ createdAt, orderNumber, status, id }) => (
+-                            <TimelineItem
+-                                key={orderNumber}
+-                                color={
+-                                    orderStatusColor(status.id.toString())
+-                                        ?.indicatorColor
+-                                }
+-                            >
+-                                <TimelineContent
+-                                    backgroundColor={
+-                                        orderStatusColor(status.id.toString())
+-                                            ?.backgroundColor || "transparent"
+-                                    }
+-                                >
+-                                    <Tooltip
+-                                        overlayInnerStyle={{ color: "#626262" }}
+-                                        color="rgba(255, 255, 255, 0.3)"
+-                                        placement="topLeft"
+-                                        title={dayjs(createdAt).format("lll")}
+-                                    >
+-                                        <CreatedAt italic>
+-                                            {dayjs(createdAt).fromNow()}
+-                                        </CreatedAt>
+-                                    </Tooltip>
+-                                    <Text>
+-                                        {t(
+-                                            `dashboard.timeline.orderStatuses.${
+-                                                orderStatusColor(
+-                                                    status.id.toString(),
+-                                                )?.text
+-                                            }`,
+-                                        )}
+-                                    </Text>
+-                                    <Number
+-                                        onClick={() => show("orders", id)}
+-                                        strong
+-                                    >
+-                                        #{orderNumber}
+-                                    </Number>
+-                                </TimelineContent>
+-                            </TimelineItem>
+-                        ),
+-                    )}
+-                </Timeline>
+-            </ConfigProvider>
+-        </AntdList>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/orderTimeline/styled.tsx b/apps/frontend/src/components/dashboard/orderTimeline/styled.tsx
+deleted file mode 100644
+index dd560c4..0000000
+--- a/apps/frontend/src/components/dashboard/orderTimeline/styled.tsx
++++ /dev/null
+@@ -1,27 +0,0 @@
+-import styled from "@emotion/styled";
+-import { Typography, Timeline as AntdTimeline } from "antd";
+-
+-export const Timeline = styled(AntdTimeline)`
+-    .ant-timeline-item-head {
+-        background-color: transparent;
+-    }
+-`;
+-
+-export const TimelineItem = styled(AntdTimeline.Item)``;
+-
+-export const TimelineContent = styled.div<{ backgroundColor: string }>`
+-    display: flex;
+-    flex-direction: column;
+-    padding: 12px;
+-    border-radius: 6px;
+-    background-color: ${({ backgroundColor }) => backgroundColor};
+-`;
+-
+-export const CreatedAt = styled(Typography.Text)`
+-    font-size: 12px;
+-    cursor: default;
+-`;
+-
+-export const Number = styled(Typography.Text)`
+-    cursor: pointer;
+-`;
+diff --git a/apps/frontend/src/components/dashboard/recentOrders/index.tsx b/apps/frontend/src/components/dashboard/recentOrders/index.tsx
+deleted file mode 100644
+index 3b179e2..0000000
+--- a/apps/frontend/src/components/dashboard/recentOrders/index.tsx
++++ /dev/null
+@@ -1,132 +0,0 @@
+-import { useNavigation, useTranslate } from "@refinedev/core";
+-import { useTable } from "@refinedev/antd";
+-import { Typography, Table, Avatar, Space, Tag } from "antd";
+-import {
+-    RecentOrdersColumn,
+-    Price,
+-    OrderId,
+-    Title,
+-    TitleWrapper,
+-} from "./styled";
+-
+-import { OrderActions } from "../../../components";
+-
+-import { IOrder } from "../../../interfaces";
+-
+-const { Text, Paragraph } = Typography;
+-
+-export const RecentOrders: React.FC = () => {
+-    const t = useTranslate();
+-    const { tableProps } = useTable<IOrder>({
+-        resource: "orders",
+-        initialSorter: [
+-            {
+-                field: "createdAt",
+-                order: "desc",
+-            },
+-        ],
+-        initialPageSize: 4,
+-        permanentFilter: [
+-            {
+-                field: "status.text",
+-                operator: "eq",
+-                value: "Pending",
+-            },
+-        ],
+-        syncWithLocation: false,
+-    });
+-
+-    const { show } = useNavigation();
+-
+-    return (
+-        <Table
+-            {...tableProps}
+-            pagination={{ ...tableProps.pagination, simple: true }}
+-            showHeader={false}
+-            rowKey="id"
+-        >
+-            <Table.Column<IOrder>
+-                key="avatar"
+-                render={(_, record) => (
+-                    <Avatar
+-                        size={{
+-                            xs: 60,
+-                            lg: 108,
+-                            xl: 132,
+-                            xxl: 144,
+-                        }}
+-                        src={record?.products[0]?.images[0].url}
+-                    />
+-                )}
+-            />
+-            <RecentOrdersColumn
+-                key="summary"
+-                render={(_, record) => (
+-                    <TitleWrapper>
+-                        <Title strong>{record.products[0]?.name}</Title>
+-                        <Paragraph
+-                            ellipsis={{
+-                                rows: 2,
+-                                tooltip: record.products[0]?.description,
+-                                symbol: <span>...</span>,
+-                            }}
+-                        >
+-                            {record.products[0]?.description}
+-                        </Paragraph>
+-
+-                        <OrderId
+-                            strong
+-                            onClick={() => {
+-                                show("orders", record.id);
+-                            }}
+-                        >
+-                            #{record.orderNumber}
+-                        </OrderId>
+-                    </TitleWrapper>
+-                )}
+-            />
+-            <RecentOrdersColumn
+-                key="summary"
+-                render={(_, record) => (
+-                    <Space direction="vertical">
+-                        <Title
+-                            strong
+-                        >{`${record.courier.name} ${record.courier.surname}`}</Title>
+-                        <Text>{record.adress.text}</Text>
+-                    </Space>
+-                )}
+-            />
+-            <Table.Column<IOrder>
+-                dataIndex="amount"
+-                render={(value, record) => (
+-                    <Space
+-                        size="large"
+-                        style={{
+-                            display: "flex",
+-                            justifyContent: "space-between",
+-                        }}
+-                    >
+-                        <Price
+-                            strong
+-                            options={{
+-                                currency: "USD",
+-                                style: "currency",
+-                                notation: "standard",
+-                            }}
+-                            value={value / 100}
+-                        />
+-                        <Tag color="orange">
+-                            {t(`enum.orderStatuses.${record.status.text}`)}
+-                        </Tag>
+-                    </Space>
+-                )}
+-            />
+-            <Table.Column<IOrder>
+-                fixed="right"
+-                key="actions"
+-                align="center"
+-                render={(_, record) => <OrderActions record={record} />}
+-            />
+-        </Table>
+-    );
+-};
+diff --git a/apps/frontend/src/components/dashboard/recentOrders/styled.tsx b/apps/frontend/src/components/dashboard/recentOrders/styled.tsx
+deleted file mode 100644
+index 5a121b9..0000000
+--- a/apps/frontend/src/components/dashboard/recentOrders/styled.tsx
++++ /dev/null
+@@ -1,28 +0,0 @@
+-import styled from "@emotion/styled";
+-import { NumberField } from "@refinedev/antd";
+-import { Table, Typography } from "antd";
+-
+-import { IOrder } from "../../../interfaces";
+-
+-export const RecentOrdersColumn = styled(Table.Column<IOrder>)`
+-    vertical-align: top;
+-`;
+-
+-export const TitleWrapper = styled.div`
+-    display: flex;
+-    flex-direction: column;
+-    justify-content: space-between;
+-`;
+-
+-export const Title = styled(Typography.Text)`
+-    font-size: 16px;
+-    word-break: inherit;
+-`;
+-
+-export const OrderId = styled(Typography.Text)`
+-    cursor: pointer;
+-`;
+-
+-export const Price = styled(NumberField)`
+-    white-space: nowrap;
+-`;
+diff --git a/apps/frontend/src/components/dashboard/trendingMenu/index.tsx b/apps/frontend/src/components/dashboard/trendingMenu/index.tsx
+deleted file mode 100644
+index 431703b..0000000
+--- a/apps/frontend/src/components/dashboard/trendingMenu/index.tsx
++++ /dev/null
+@@ -1,61 +0,0 @@
+-import { NumberField, useSimpleList } from "@refinedev/antd";
+-import { Typography, Avatar, Space, List as AntdList } from "antd";
+-import { Container, AvatarWrapper, AvatarCircle, TextWrapper } from "./styled";
+-
+-import { IOrder } from "../../../interfaces";
+-
+-const { Text } = Typography;
+-
+-export const TrendingMenu: React.FC = () => {
+-    const { listProps } = useSimpleList<IOrder>({
+-        resource: "orders",
+-        pagination: { pageSize: 5 },
+-        syncWithLocation: false,
+-    });
+-
+-    return (
+-        <AntdList
+-            {...listProps}
+-            pagination={false}
+-            renderItem={(item, index) => <MenuItem item={item} index={index} />}
+-        ></AntdList>
+-    );
+-};
+-
+-const MenuItem: React.FC<{ item: IOrder; index: number }> = ({
+-    item,
+-    index,
+-}) => (
+-    <Container key={item.id}>
+-        <Space size="large">
+-            <AvatarWrapper className="menu-item__avatar">
+-                <Avatar
+-                    size={{
+-                        xs: 64,
+-                        sm: 64,
+-                        md: 64,
+-                        lg: 108,
+-                        xl: 132,
+-                        xxl: 108,
+-                    }}
+-                    src={item.products[0]?.images[0]?.url}
+-                />
+-                <AvatarCircle>
+-                    <span>#{index + 1}</span>
+-                </AvatarCircle>
+-            </AvatarWrapper>
+-            <TextWrapper>
+-                <Text strong>{item.products[0]?.name}</Text>
+-                <NumberField
+-                    strong
+-                    options={{
+-                        currency: "USD",
+-                        style: "currency",
+-                        notation: "standard",
+-                    }}
+-                    value={item.amount / 100}
+-                />
+-            </TextWrapper>
+-        </Space>
+-    </Container>
+-);
+diff --git a/apps/frontend/src/components/dashboard/trendingMenu/styled.tsx b/apps/frontend/src/components/dashboard/trendingMenu/styled.tsx
+deleted file mode 100644
+index 5df4d7b..0000000
+--- a/apps/frontend/src/components/dashboard/trendingMenu/styled.tsx
++++ /dev/null
+@@ -1,65 +0,0 @@
+-import styled from "@emotion/styled";
+-
+-export const Container = styled.div`
+-    margin-bottom: 45px;
+-
+-    @media screen and (max-width: 768px) {
+-        .menu-item {
+-            &__avatar {
+-                &-circle {
+-                    width: 28px;
+-                    height: 28px;
+-                    font-size: 10px;
+-                }
+-            }
+-
+-            &__text {
+-                span {
+-                    font-size: 16px;
+-                }
+-            }
+-        }
+-    }
+-`;
+-
+-export const AvatarWrapper = styled.div`
+-    position: relative;
+-`;
+-
+-export const AvatarCircle = styled.div`
+-    background-color: #67be23;
+-    width: 44px;
+-    height: 44px;
+-    border-radius: 22px;
+-    position: absolute;
+-    transform: translate(-50%, -50%);
+-    top: 100%;
+-    left: 50%;
+-    border: 4px solid #ffffff;
+-    display: flex;
+-    justify-content: center;
+-    align-items: center;
+-    color: #ffffff;
+-    font-weight: 800;
+-
+-    @media screen and (max-width: 768px) {
+-        width: 28px;
+-        height: 28px;
+-        font-size: 10px;
+-    }
+-`;
+-
+-export const TextWrapper = styled.div`
+-    display: flex;
+-    flex-direction: column;
+-
+-    span {
+-        font-size: 16px;
+-    }
+-
+-    @media screen and (max-width: 768px) {
+-        span {
+-            font-size: 16px;
+-        }
+-    }
+-`;
+diff --git a/apps/frontend/src/components/index.ts b/apps/frontend/src/components/index.ts
+index c55166f..f5a3779 100644
+--- a/apps/frontend/src/components/index.ts
++++ b/apps/frontend/src/components/index.ts
+@@ -4,6 +4,5 @@ export * from "./orderStatus";
+ export * from "./memberStatus";
+ export * from "./icons";
+ export * from "./orderActions";
+-export * from "./dashboard";
+ export * from "./offLayoutArea";
+ export * from "./map";
+diff --git a/apps/member-mngt/.dockerignore b/apps/member-mngt/.dockerignore
+new file mode 100644
+index 0000000..6c65c27
+--- /dev/null
++++ b/apps/member-mngt/.dockerignore
+@@ -0,0 +1,6 @@
++
++node_modules
++.git
++.gitignore
++*.md
++dist
+\ No newline at end of file
+diff --git a/apps/member-mngt/Dockerfile b/apps/member-mngt/Dockerfile
+new file mode 100644
+index 0000000..b807b37
+--- /dev/null
++++ b/apps/member-mngt/Dockerfile
+@@ -0,0 +1,5 @@
++FROM base
++COPY --from=library-prod-deps /app/apps/member-mngt/node_modules/ /app/apps/member-mngt/node_modules
++COPY --from=library-build /app/apps/member-mngt/dist /app/apps/member-mngt/dist
++EXPOSE 4201
++CMD [ "pnpm", "start" ]
+\ No newline at end of file
+diff --git a/apps/member-mngt/src/member/member.controller.ts b/apps/member-mngt/src/member/member.controller.ts
+index 763b957..6e38bcb 100644
+--- a/apps/member-mngt/src/member/member.controller.ts
++++ b/apps/member-mngt/src/member/member.controller.ts
+@@ -1,5 +1,5 @@
+ import { Controller, Logger } from '@nestjs/common';
+-import { MessagePattern } from '@nestjs/microservices';
++import { MessagePattern, RpcException } from '@nestjs/microservices';
+ import { CreateMemberInput } from './create-member.input.model';
+ import { MemberService } from './member.service';
+ import { UpdateMemberInput } from './update-member.input.model';
+@@ -19,6 +19,16 @@ export class MemberController {
+     return  await this.memberService.getMemberByStudentId(studentId);
+   }
+ 
++  @MessagePattern({ cmd: 'check_member_by_student_id' })
++  async checkMemberByStudentId(studentId: string) {
++    const member = await this.memberService.getMemberByStudentId(studentId);
++    if (!member) throw new RpcException(`Student with id "${studentId}" does not exist.`);
++
++    if (member.status !== 'active') throw new RpcException(`Student with id "${studentId}" is not active.`);
++    
++    return member;
++  }
++
+   @MessagePattern({ cmd: 'get_members' })
+   async getMembers() {
+     return await this.memberService.getAllMembers();
+diff --git a/docker-compose.yml b/docker-compose.yml
+new file mode 100644
+index 0000000..77d48cf
+--- /dev/null
++++ b/docker-compose.yml
+@@ -0,0 +1,79 @@
++version: '3.8'
++
++services:
++  db:
++    image: postgres:13
++    restart: unless-stopped
++    ports:
++      - '5431:5432'
++    healthcheck:
++      test: ['CMD', 'pg_isready']
++      interval: 5s
++      timeout: 2s
++      retries: 20
++    environment:
++      POSTGRES_USER: library
++      POSTGRES_PASSWORD: library
++
++  library-db:
++    build:
++      context: ./
++      dockerfile: ./packages/library-db/Dockerfile
++    env_file: ./packages/library-db/.env
++    depends_on:
++      - db
++
++  member-mngt:
++    build:
++      context: ./
++      dockerfile: ./apps/member-mngt/Dockerfile
++    ports:
++      - "4201:4201"
++    depends_on:
++      - db
++      - library-db
++    env_file: ./apps/member-mngt/.env
++
++  book-mngt:
++    build:
++      context: ./
++      dockerfile: ./apps/book-mngt/Dockerfile
++    ports:
++      - "4202:4202"
++    depends_on:
++      - db
++      - library-db
++    env_file: ./apps/book-mngt/.env
++
++  borrow-mngt:
++    build:
++      context: ./
++      dockerfile: ./apps/borrow-mngt/Dockerfile
++    ports:
++      - "4203:4203"
++    depends_on:
++      - db
++      - library-db
++      - member-mngt
++      - book-mngt
++    env_file: ./apps/borrow-mngt/.env
++
++  api-gateway:
++    build:
++      context: ./
++      dockerfile: ./apps/api-gateway/Dockerfile
++    ports:
++      - "4200:4200"
++    depends_on:
++      - member-mngt
++      - book-mngt
++      - borrow-mngt
++    env_file: ./apps/api-gateway/.env
++
++  frontend:
++    build:
++      context: ./
++      dockerfile: ./apps/frontend/Dockerfile
++    ports:
++      - "5173:80"
++    env_file: ./apps/frontend/.env
+diff --git a/docker/Dockerfile b/docker/Dockerfile
+new file mode 100644
+index 0000000..9d5d5fd
+--- /dev/null
++++ b/docker/Dockerfile
+@@ -0,0 +1,13 @@
++FROM node:20-slim as base
++ENV PNPM_HOME="/pnpm"
++ENV PATH="$PNPM_HOME:$PATH"
++RUN corepack enable
++COPY . /app
++WORKDIR /app
++
++FROM base AS library-prod-deps
++RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
++
++FROM base AS library-build
++RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
++RUN pnpm run -r build
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 5387b1c..b509112 100644
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,13 @@
+     "build:api": "turbo run build --filter=*-mngt",
+     "db:deploy": "turbo run db:deploy --filter=library-db",
+     "format": "turbo run format",
+-    "prepare": "husky install"
++    "prepare": "husky install",
++    "start": "./scripts/start.sh",
++    "stop": "./scripts/stop.sh",
++    "start:member-mngt": "turbo run start --filter=member-mngt",
++    "start:book-mngt": "turbo run start --filter=book-mngt",
++    "start:borrow-mngt": "turbo run start --filter=borrow-mngt",
++    "start:api-gateway": "turbo run start --filter=api-gateway",
++    "start:frontend": "turbo run start --filter=frontend"
+   }
+ }
+diff --git a/packages/library-db/.env.docker b/packages/library-db/.env.docker
+new file mode 100644
+index 0000000..8c1644e
+--- /dev/null
++++ b/packages/library-db/.env.docker
+@@ -0,0 +1,14 @@
++# Environment variables declared in this file are automatically made available to Prisma.
++# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
++
++# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
++# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
++
++POSTGRES_USER=library
++POSTGRES_PASSWORD=library
++POSTGRES_DB=library
++DB_HOST=db
++DB_PORT=5431
++DB_SCHEMA=public
++
++DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=prefer
+\ No newline at end of file
+diff --git a/packages/library-db/Dockerfile b/packages/library-db/Dockerfile
+new file mode 100644
+index 0000000..2558581
+--- /dev/null
++++ b/packages/library-db/Dockerfile
+@@ -0,0 +1,2 @@
++FROM library-build
++CMD ["pnpm", "db:deploy"]
+\ No newline at end of file
+diff --git a/scripts/build_images.sh b/scripts/build_images.sh
+new file mode 100644
+index 0000000..1b694d5
+--- /dev/null
++++ b/scripts/build_images.sh
+@@ -0,0 +1,3 @@
++docker build --target base --tag base:latest -f ./docker/Dockerfile .
++docker build --target library-prod-deps --tag library-prod-deps:latest -f ./docker/Dockerfile .
++docker build --target library-build --tag library-build:latest -f ./docker/Dockerfile .
+\ No newline at end of file
+diff --git a/scripts/start.sh b/scripts/start.sh
+new file mode 100755
+index 0000000..f5adffc
+--- /dev/null
++++ b/scripts/start.sh
+@@ -0,0 +1,36 @@
++#!/bin/bash
++
++mkdir -p logs
++mkdir -p pids
++# run_program (nodefile, pidfile, logfile)
++run_program ()
++{
++  service=$1
++  pidfile=$2
++  logfile=$3
++
++  if [ -e "$pidfile" ]
++  then
++    echo "$service is already running. Run 'npm stop' if you wish to restart."
++    return 0
++  fi
++
++  pnpm $service >> $logfile 2>&1 &
++  PID=$!
++  if [ $? -eq 0 ]
++  then
++    echo "Successfully started $service. PID=$PID. Logs are at $logfile"
++    echo $PID > $pidfile
++    return 0
++  else
++    echo "Could not start $nodefile - check logs at $logfile"
++    exit 1
++  fi
++}
++
++run_program start:member-mngt pids/member-mngt.pid logs/member-mngt.log
++run_program start:book-mngt pids/book-mngt.pid logs/book-mngt.log
++run_program start:borrow-mngt pids/borrow-mngt.pid logs/borrow-mngt.log
++run_program start:api-gateway pids/api-gateway.pid logs/api-gateway.log
++run_program start:frontend pids/frontend.pid logs/frontend.log
++
+diff --git a/scripts/stop.sh b/scripts/stop.sh
+new file mode 100755
+index 0000000..44d9bdd
+--- /dev/null
++++ b/scripts/stop.sh
+@@ -0,0 +1,18 @@
++#!/bin/bash
++
++stop_program ()
++{
++  pidfile=$1
++
++  echo "Stopping Process - $pidfile. PID=$(cat $pidfile)"
++  kill -9 $(cat $pidfile)
++  rm $pidfile
++  
++}
++
++stop_program pids/member-mngt.pid
++stop_program pids/book-mngt.pid
++stop_program pids/borrow-mngt.pid
++stop_program pids/api-gateway.pid
++stop_program pids/frontend.pid
++
+diff --git a/turbo.json b/turbo.json
+index 017146a..880cca2 100644
+--- a/turbo.json
++++ b/turbo.json
+@@ -30,6 +30,9 @@
+       },
+       "db:deploy": {
+         "cache": false
++      },
++      "start": {
++        "cache": false
+       }
+     }
+   }
+\ No newline at end of file

@@ -18,7 +18,7 @@ import routerProvider, {
 } from "@refinedev/react-router-v6";
 import jsonServerDataProvider from "@refinedev/simple-rest";
 import React from "react";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authProvider } from "./authProvider";
 
 import "dayjs/locale/de";
@@ -47,7 +47,7 @@ const App: React.FC = () => {
     const { t, i18n } = useTranslation();
 
     const i18nProvider = {
-        translate: (key: string, params: object) => t(key, params),
+        translate: (key: string, options: string) => t(key, options),
         changeLocale: (lang: string) => i18n.changeLanguage(lang),
         getLocale: () => i18n.language,
     };
@@ -126,8 +126,14 @@ const App: React.FC = () => {
                                     </Authenticated>
                                 }
                             >
+                                <Route
+                                    index
+                                    path="/"
+                                    element={<Navigate to="/books" replace />}
+                                />
                                 
                                 <Route
+                                    index
                                     path="/books"
                                     element={<BookList />}
                                 />
@@ -168,7 +174,7 @@ const App: React.FC = () => {
                             <Route
                                 element={
                                     <Authenticated fallback={<Outlet />}>
-                                        <NavigateToResource resource="dashboard" />
+                                        <NavigateToResource resource="members" />
                                     </Authenticated>
                                 }
                             >

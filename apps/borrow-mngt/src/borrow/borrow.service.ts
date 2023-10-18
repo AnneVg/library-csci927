@@ -1,14 +1,24 @@
-import { Injectable, Logger, Patch } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap, Patch } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBorrowInput } from './create-borrow.input.model';
 import { UpdateBorrowInput } from './update-borrow.input.model';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class BorrowService {
+export class BorrowService implements OnApplicationBootstrap {
   private logger: Logger = new Logger(this.constructor.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('MEMBERS_SERVICE') private memberClientApp: ClientProxy,
+    @Inject('BOOKS_SERVICE') private bookClientApp: ClientProxy,
+  ) { }
+
+  async onApplicationBootstrap() {
+    await this.memberClientApp.connect();
+    await this.bookClientApp.connect();
+  }
 
   async getAllBorrows() {
     const borrows = await this.prisma.borrowingBook.findMany({
@@ -34,25 +44,18 @@ export class BorrowService {
   }
 
   async addBorrow(createBorrowInput: CreateBorrowInput) {
-    const student = await this.prisma.member.findFirst({
-      where: {
-        studentId: createBorrowInput.studentId
-      }
-    });
 
-    if (!student) throw new RpcException('Invalid student');
-    if (student.status !== 'active') throw new RpcException('Student is not active');
+    const memberPattern = { cmd: 'check_member_by_student_id'};
+    const studentObs = this.memberClientApp
+      .send(memberPattern, createBorrowInput.studentId);
 
-    const book = await this.prisma.book.findFirst({
-      where: {
-        isbn: createBorrowInput.isbn
-      }
-    });
-    if (!book) throw Error('Invalid book');
+    const student = await lastValueFrom(studentObs);
 
-    if (book.status != 'available') throw new RpcException('Book is not available');
+    const bookPattern = { cmd: 'check_book_available_by_isbn'};
+    const bookObs = this.bookClientApp
+      .send(bookPattern, createBorrowInput.isbn);
 
-    if (book.stock < 1) throw new RpcException('Out of stock');
+    const book = await lastValueFrom(bookObs);
 
     const dataToInsert = {
       data: {
@@ -119,7 +122,7 @@ export class BorrowService {
         }
       });
     }
-  
+
     return updatedBorrow;
   }
 
@@ -129,6 +132,6 @@ export class BorrowService {
         id: borrowId
       }
     });
-  
+
   }
 }

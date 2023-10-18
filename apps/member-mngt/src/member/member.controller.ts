@@ -1,5 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, RpcException } from '@nestjs/microservices';
 import { CreateMemberInput } from './create-member.input.model';
 import { MemberService } from './member.service';
 import { UpdateMemberInput } from './update-member.input.model';
@@ -17,6 +17,16 @@ export class MemberController {
   @MessagePattern({ cmd: 'get_member_by_student_id' })
   async getMemberByStudentId(studentId: string) {
     return  await this.memberService.getMemberByStudentId(studentId);
+  }
+
+  @MessagePattern({ cmd: 'check_member_by_student_id' })
+  async checkMemberByStudentId(studentId: string) {
+    const member = await this.memberService.getMemberByStudentId(studentId);
+    if (!member) throw new RpcException(`Student with id "${studentId}" does not exist.`);
+
+    if (member.status !== 'active') throw new RpcException(`Student with id "${studentId}" is not active.`);
+    
+    return member;
   }
 
   @MessagePattern({ cmd: 'get_members' })
