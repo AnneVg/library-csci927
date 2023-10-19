@@ -15,6 +15,7 @@ import {
     Typography,
     Image,
 } from "antd";
+import { useDelete } from "@refinedev/core";
 
 import { IBook, IProduct } from "../../interfaces";
 
@@ -32,6 +33,9 @@ export const BookItem: React.FC<BookItemProps> = ({
     editShow,
 }) => {
     const t = useTranslate();
+    const { id } = item;
+
+    const { mutate: mutateDelete } = useDelete();
 
     return (
         <Card
@@ -79,6 +83,27 @@ export const BookItem: React.FC<BookItemProps> = ({
                                 onClick={() => editShow(item.id)}
                             >
                                 {t("stores.buttons.edit")}
+                            </Menu.Item>
+                            <Menu.Item
+                                key="3"
+                                style={{
+                                    fontWeight: 500,
+                                }}
+                                icon={
+                                    <CloseCircleOutlined
+                                        style={{
+                                            color: "red",
+                                        }}
+                                    />
+                                }
+                                onClick={() => {
+                                    mutateDelete({
+                                        resource: "books",
+                                        id
+                                    });
+                                }}
+                            >
+                                {t("buttons.delete")}
                             </Menu.Item>
                         </Menu>
                     }
