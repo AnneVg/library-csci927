@@ -1,2 +1,4 @@
-FROM library-build
-CMD ["pnpm", "db:deploy"]
+FROM library-build:latest
+RUN pnpm db:deploy
+CMD ["pnpm", "db:seeds"]
+# ENTRYPOINT ["tail", "-f", "/dev/null"]

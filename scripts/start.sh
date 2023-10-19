@@ -2,7 +2,7 @@
 
 mkdir -p logs
 mkdir -p pids
-# run_program (nodefile, pidfile, logfile)
+# run_program (service, pidfile, logfile)
 run_program ()
 {
   service=$1
@@ -15,7 +15,7 @@ run_program ()
     return 0
   fi
 
-  pnpm $service >> $logfile 2>&1 &
+  pnpm start:$service >> $logfile 2>&1 &
   PID=$!
   if [ $? -eq 0 ]
   then
@@ -28,9 +28,9 @@ run_program ()
   fi
 }
 
-run_program start:member-mngt pids/member-mngt.pid logs/member-mngt.log
-run_program start:book-mngt pids/book-mngt.pid logs/book-mngt.log
-run_program start:borrow-mngt pids/borrow-mngt.pid logs/borrow-mngt.log
-run_program start:api-gateway pids/api-gateway.pid logs/api-gateway.log
-run_program start:frontend pids/frontend.pid logs/frontend.log
+run_program member-mngt pids/member-mngt.pid logs/member-mngt.log
+run_program book-mngt pids/book-mngt.pid logs/book-mngt.log
+run_program borrow-mngt pids/borrow-mngt.pid logs/borrow-mngt.log
+run_program api-gateway pids/api-gateway.pid logs/api-gateway.log
+run_program frontend pids/frontend.pid logs/frontend.log
 

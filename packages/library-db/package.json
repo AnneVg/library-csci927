@@ -1,5 +1,5 @@
 {
-    "name": "database",
+    "name": "library-db",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "typings": "dist/index.d.ts",
@@ -26,7 +26,7 @@
       "build": "rimraf dist && tsc --build",
       "db:generate": "prisma generate",
       "db:push": "prisma db push --skip-generate",
-      "db:deploy": "prisma migrate deploy",
+      "db:deploy": "prisma migrate dev",
       "db:seeds": "ts-node prisma/seeds/index.ts"
     },
     "prisma": {

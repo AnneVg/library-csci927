@@ -1,10 +1,10 @@
 // define functions of service
-import { Injectable, Logger, Patch } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { Prisma } from 'library-db';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookInput } from './create-book.input.model';
 import { UpdateBookInput } from './update-book.input.model';
-import { Prisma } from 'database';
-import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class BookService {

@@ -2,78 +2,107 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13
+    image: postgres:16
     restart: unless-stopped
     ports:
       - '5431:5432'
-    healthcheck:
-      test: ['CMD', 'pg_isready']
-      interval: 5s
-      timeout: 2s
-      retries: 20
     environment:
-      POSTGRES_USER: library
-      POSTGRES_PASSWORD: library
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: library
+
+  base:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.base
+    image: base
+    depends_on:
+      - db
+
+  library-prod-deps:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.prod
+    image: library-prod-deps
+    depends_on:
+      - base
+  
+  library-build:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.build
+    image: library-build
+    depends_on:
+      - base
 
   library-db:
     build:
       context: ./
       dockerfile: ./packages/library-db/Dockerfile
-    env_file: ./packages/library-db/.env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=library
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_SCHEMA=public
+      - DATABASE_URL=postgresql://postgres:postges@db:5432/libraDATAB-ASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST}:${DB_PORT}/${POSTGRES_DB}?schema=${DB_SCHEMA}&sslmode=preferry?schema=public&sslmode=prefer
     depends_on:
       - db
+      - library-build
 
-  member-mngt:
-    build:
-      context: ./
-      dockerfile: ./apps/member-mngt/Dockerfile
-    ports:
-      - "4201:4201"
-    depends_on:
-      - db
-      - library-db
-    env_file: ./apps/member-mngt/.env
+  # member-mngt:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./apps/member-mngt/Dockerfile
+  #   ports:
+  #     - "4201:4201"
+  #   depends_on:
+  #     - db
+  #     - library-db
+  #   environment:
+  #     - PORT=4201
 
-  book-mngt:
-    build:
-      context: ./
-      dockerfile: ./apps/book-mngt/Dockerfile
-    ports:
-      - "4202:4202"
-    depends_on:
-      - db
-      - library-db
-    env_file: ./apps/book-mngt/.env
+  # book-mngt:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./apps/book-mngt/Dockerfile
+  #   ports:
+  #     - "4202:4202"
+  #   depends_on:
+  #     - db
+  #     - library-db
+  #   env_file: ./apps/book-mngt/.env
 
-  borrow-mngt:
-    build:
-      context: ./
-      dockerfile: ./apps/borrow-mngt/Dockerfile
-    ports:
-      - "4203:4203"
-    depends_on:
-      - db
-      - library-db
-      - member-mngt
-      - book-mngt
-    env_file: ./apps/borrow-mngt/.env
+  # borrow-mngt:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./apps/borrow-mngt/Dockerfile
+  #   ports:
+  #     - "4203:4203"
+  #   depends_on:
+  #     - db
+  #     - library-db
+  #     - member-mngt
+  #     - book-mngt
+  #   env_file: ./apps/borrow-mngt/.env
 
-  api-gateway:
-    build:
-      context: ./
-      dockerfile: ./apps/api-gateway/Dockerfile
-    ports:
-      - "4200:4200"
-    depends_on:
-      - member-mngt
-      - book-mngt
-      - borrow-mngt
-    env_file: ./apps/api-gateway/.env
+  # api-gateway:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./apps/api-gateway/Dockerfile
+  #   ports:
+  #     - "4200:4200"
+  #   depends_on:
+  #     - member-mngt
+  #     - book-mngt
+  #     - borrow-mngt
+  #   env_file: ./apps/api-gateway/.env
 
-  frontend:
-    build:
-      context: ./
-      dockerfile: ./apps/frontend/Dockerfile
-    ports:
-      - "5173:80"
-    env_file: ./apps/frontend/.env
+  # frontend:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./apps/frontend/Dockerfile
+  #   ports:
+  #     - "5173:80"
+  #   env_file: ./apps/frontend/.env

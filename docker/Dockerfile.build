@@ -1,0 +1,4 @@
+
+FROM base AS library-build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm build

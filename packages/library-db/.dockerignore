@@ -1,8 +1,13 @@
+.gitignore
+*.md
+dist
+**/dist
 Dockerfile
-.dockerignore
 node_modules
 **/node_modules
 npm-debug.log
-README.md
 .next
 .git
+**/.git
+.env
+**/*.env

@@ -15,7 +15,7 @@
       "build": {
         "cache": false,
         "dependsOn": [
-          "^db:generate",
+          "library-db#db:generate",
           "^build"
         ],
         "outputs": [
