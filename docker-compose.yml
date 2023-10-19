@@ -31,6 +31,29 @@ services:
     depends_on:
       - base
 
+  library-db:
+    build:
+      context: ./
+      dockerfile: ./packages/library-db/Dockerfile
+    depends_on:
+      - db
+      - library-build
+    env_file: ./packages/library-db/.env.docker
+    networks:
+      - backend
+
+  member-mngt:
+    build:
+      context: ./
+      dockerfile: ./apps/member-mngt/Dockerfile
+    ports:
+      - "4201:4201"
+    depends_on:
+      - db
+      - library-db
+    env_file: ./apps/member-mngt/.env.docker
+    networks:
+      - backend
 
   book-mngt:
     build:
@@ -45,7 +68,7 @@ services:
     networks:
       - backend
 
-  library-db:
+  borrow-mngt:
     build:
       context: ./
       dockerfile: ./apps/borrow-mngt/Dockerfile
