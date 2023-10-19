@@ -99,7 +99,7 @@ export class BookService {
   }
 
   async deleteBook(id: string) {
-    await this.prisma.book.delete({
+    return await this.prisma.book.delete({
       where: {
         id: id,
       },

@@ -102,12 +102,14 @@ export class BookApiController implements OnApplicationBootstrap {
   @Delete(':id')
   @HttpCode(204)
   async deleteBook(@Param('id') id: string) {
-    const pattern = { cmd: 'update_book' };
+    const pattern = { cmd: 'delete_book' };
     try {
+      console.log(id);
       return await this.bookClientApp
         .send<string>(pattern, id)
         .pipe(map((message) => message))
     } catch (err) {
+      console.log(err);
       this.logger.error(err);
     }
   }

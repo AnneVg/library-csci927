@@ -72,7 +72,7 @@ export class BookController {
   @MessagePattern({ cmd: 'delete_book' })
   async deleteBook(id: string) {
     try {
-      await this.bookService.deleteBook(id);
+      return await this.bookService.deleteBook(id);
     } catch (err) {
       this.logger.error(err);
     }
