@@ -40,7 +40,8 @@ import { BorrowCreate, BorrowList } from "./pages/borrow";
 
 const App: React.FC = () => {
 
-    const libraryApiUrl = process.env.LIBRARY_API_URL || 'http://localhost:4200/api';
+    const { REACT_APP_LIBRARY_API_URL } = process.env;
+    const libraryApiUrl = `${REACT_APP_LIBRARY_API_URL}/api` || 'http://localhost:4200/api';
     
     const bookProvider = jsonServerDataProvider(libraryApiUrl);
 

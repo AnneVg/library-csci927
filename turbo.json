@@ -25,6 +25,9 @@
       "db:generate": {
         "cache": false
       },
+      "db:seeds": {
+        "cache": false
+      },
       "db:push": {
         "cache": false
       },
@@ -32,6 +35,21 @@
         "cache": false
       },
       "start": {
+        "cache": false
+      },
+      "start-member-mngt": {
+        "cache": false
+      },
+      "start:book-mngt": {
+        "cache": false
+      },
+      "start:borrow-mngt": {
+        "cache": false
+      },
+      "start:api-gateway": {
+        "cache": false
+      },
+      "start:frontend": {
         "cache": false
       }
     }

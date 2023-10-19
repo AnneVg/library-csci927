@@ -11,6 +11,7 @@
     "build": "turbo run build --include-dependencies",
     "build:api": "turbo run build --filter=*-mngt",
     "db:deploy": "turbo run db:deploy --filter=library-db",
+    "db:seeds": "turbo run db:seeds --filter=library-db",
     "format": "turbo run format",
     "start:all": "./scripts/start.sh",
     "stop:all": "./scripts/stop.sh",

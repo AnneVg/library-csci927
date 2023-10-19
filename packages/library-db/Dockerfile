@@ -1,4 +1,4 @@
 FROM library-build:latest
-RUN pnpm db:deploy
-CMD ["pnpm", "db:seeds"]
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
+COPY package.json /app/
+COPY turbo.json /app/
+CMD ["/bin/bash", "-c", "pnpm db:deploy;pnpm db:seeds"]
